@@ -50,3 +50,4 @@
   - הרצה: `.\.venv\Scripts\python.exe eval\evaluate.py run "samples\<קובץ>.pdf" 1-10 --runs 1`
   - אפשרויות: `--provider gemini|anthropic|chain` (`chain` = שרשרת המודלים של השרת לפי `MODEL_CHAIN`, החלטה 34), `--model gemini-3.8-flash` (ברירת מחדל: `GEMINI_MODEL` / `ANTHROPIC_MODEL`), `--interval 13` (שניות בין בקשות, לפי מכסת הדקה), ו-`--media-resolution high` (רזולוציית קריאת התמונה במודל. בשרת אותה הגדרה דרך `GEMINI_MEDIA_RESOLUTION` ב-`.env`).
   - ציון מחדש בלי מודל: `.\.venv\Scripts\python.exe eval\evaluate.py score [תיקיית סדרה] [--pages 1-10]`
+  - ציון להעלאה שנעשתה באתר (קורא מהמסד, בלי מודל; ברירת מחדל: ההעלאה האחרונה): `.\.venv\Scripts\python.exe eval\evaluate.py site [--batch מזהה] [--file 1]`. להריץ **לפני** תיקונים ואישורים במסך, אחרת הציון כולל אותם.

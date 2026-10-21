@@ -3,6 +3,7 @@
                                 [--media-resolution low|medium|high] [--provider gemini|anthropic|chain]
                                                                      מריץ את המודל, שומר ומחשב ציון
     python eval/evaluate.py score [תיקיית סדרה] [--pages 1-10]        ציון מחדש מתוצאות שמורות, בלי מודל
+    python eval/evaluate.py site [--batch מזהה] [--file 1]           ציון להעלאה שנעשתה באתר (מהמסד, בלי מודל)
 התוצאות נשמרות ב-eval/results/ (לא נכנס ל-Git), כולל report.xlsx עם רשימת אי-ההתאמות לבדיקה.
 """
 import json
@@ -145,6 +146,75 @@ def run_series(pdf: str, pages: list[int], runs: int, model: str | None = None,
     return series
 
 
+# ---------- העלאה מהאתר ----------
+
+def site_series(batch_id: str | None = None, file_no: int | None = None) -> Path:
+    """שומרת העלאה שנעשתה באתר (מהמסד, בלי מודל) כסדרה רגילה, כדי לתת לה ציון. ברירת מחדל: ההעלאה האחרונה."""
+    from sqlmodel import Session, select
+
+    from app import db
+    from app.schema import Commitment, CommitmentNumber, RecordKind, RecordState
+
+    with Session(db.get_engine()) as s:
+        if not batch_id:
+            batch_id = s.exec(select(Commitment.batch_id).where(
+                Commitment.kind == RecordKind.user.value, Commitment.batch_id.is_not(None))
+                .order_by(Commitment.created_at.desc())).first()
+        rows = list(s.exec(select(Commitment).where(Commitment.batch_id == batch_id)
+                           .order_by(Commitment.created_at)))
+        if not rows:
+            sys.exit("לא נמצאו רשומות להעלאה הזו במסד.")
+        nums = list(s.exec(select(CommitmentNumber).where(
+            CommitmentNumber.commitment_id.in_([c.id for c in rows]))
+            .order_by(CommitmentNumber.kind, CommitmentNumber.position)))
+    files = sorted({c.source_file for c in rows})
+    if file_no is None and len(files) > 1:
+        sys.exit(f"בהעלאה יש {len(files)} קבצים. לבחור אחד עם --file (מספרי העמודים בטבלת האמת שייכים לקובץ אחד).")
+    file_no = file_no or files[0]
+
+    by_record = defaultdict(list)
+    for n in nums:
+        by_record[n.commitment_id].append(n)
+    pages: dict[int, list] = defaultdict(list)  # עמוד -> הרשומות שלו (כמה, אם הטופס פוצל לפי התחייבות)
+    for c in rows:
+        if c.source_file == file_no and c.source_page:
+            pages[c.source_page].append(c)
+
+    edited = sum(1 for c in rows if c.state == RecordState.approved.value
+                 or (c.updated_at - c.created_at).total_seconds() > 5)
+    if edited:
+        print(f"שימו לב: {edited} רשומות תוקנו או אושרו אחרי הקריאה. הציון כולל את התיקונים, "
+              "ולכן לא משקף רק את המערכת.\n")
+
+    out = {"model": f"site · batch {batch_id[:8]}", "pages": sorted(pages), "results": {}}
+    last = None
+    for page in sorted(pages, key=lambda p: pages[p][0].created_at):
+        recs = pages[page]
+        first = recs[0]
+        seconds = round((first.created_at - last).total_seconds(), 1) if last else None
+        last = first.created_at
+        if first.state == RecordState.failed.value:
+            out["results"][page] = {"error": first.error_code, "message": first.error_message}
+            continue
+        d = db._to_dict(first, by_record[first.id])
+        commitments = {}
+        for c in recs:  # טופס שפוצל: כל מספרי ההתחייבות מכל הרשומות שלו
+            for n in db._to_dict(c, by_record[c.id])["commitment_numbers"]:
+                commitments.setdefault(n["value"], n)
+        form = {k: d[k] for k in ("first_name", "last_name", "id_number", "received_date", "sender")}
+        form.update(source_page=page, central_numbers=d["central_numbers"],
+                    commitment_numbers=list(commitments.values()))
+        out["results"][page] = {"form": form, "seconds": seconds, "model": first.model_used}
+    times = [p[0].created_at for p in pages.values()]
+    if len(times) > 1:
+        out["wall_seconds"] = round((max(times) - min(times)).total_seconds() * len(times) / (len(times) - 1), 1)
+
+    series = RESULTS / f"site-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    series.mkdir(parents=True)
+    (series / "run_1.json").write_text(json.dumps(out, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    return series
+
+
 # ---------- ציון ----------
 
 def predicted(form: ExtractedForm, attr: str):
@@ -194,7 +264,7 @@ def score(series: Path, only: list[int] | None = None) -> None:
     per_run = [Counter() for _ in runs]
     by_tag = defaultdict(Counter)
     cells = defaultdict(list)  # (עמוד, שדה) -> [(ערך, סומן, קטגוריה, סיבות) לכל הרצה]
-    seconds, failed = [], Counter()
+    seconds, failed, models = [], Counter(), Counter()
     for i, run in enumerate(runs):
         for page, res in sorted(run["results"].items()):
             if "error" in res:
@@ -202,7 +272,10 @@ def score(series: Path, only: list[int] | None = None) -> None:
                 continue
             if page not in truth:
                 continue
-            seconds.append(res["seconds"])
+            if res.get("seconds") is not None:
+                seconds.append(res["seconds"])
+            if res.get("model"):
+                models[res["model"]] += 1
             # אם נשמרה התשובה הגולמית, הכללים בקוד מופעלים מחדש (כך נמדד תיקון בקוד בלי מודל)
             if "raw" in res:
                 form = build_form(ModelOutput.model_validate(res["raw"]), page)
@@ -259,6 +332,8 @@ def score(series: Path, only: list[int] | None = None) -> None:
               f"{TARGET_PAGES} עמודים ≈ {per_page * TARGET_PAGES / 60:.1f} דקות (יעד: {TARGET_SECONDS // 60})")
     if failed:
         print("עמודים שנכשלו: " + ", ".join(f"{k} {v}" for k, v in failed.items()))
+    if models:  # בשרשרת: כמה עמודים קרא כל מודל (כמה עברו לגיבוי)
+        print("עמודים לפי מודל: " + ", ".join(f"{k} {v}" for k, v in models.most_common()))
 
     if not only:  # ציון חלקי לא דורס את הדוח המלא
         path = write_report(series, runs, truth, counts, mismatches, unstable)
@@ -335,6 +410,10 @@ def main() -> None:
         if "--interval" in args:  # מרווח בין בקשות לפי מכסת הדקה של המודל (Flash חינמי: 5 בדקה)
             pipeline.MIN_INTERVAL = float(args[args.index("--interval") + 1])
         score(run_series(args[1], parse_pages(args[2]), runs, model, resolution, provider))
+    elif args[:1] == ["site"]:
+        batch = args[args.index("--batch") + 1] if "--batch" in args else None
+        file_no = int(args[args.index("--file") + 1]) if "--file" in args else None
+        score(site_series(batch, file_no))
     elif args[:1] == ["score"]:
         only = parse_pages(args.pop(args.index("--pages") + 1)) if "--pages" in args else None
         args = [a for a in args if a != "--pages"]
