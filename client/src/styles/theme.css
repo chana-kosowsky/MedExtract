@@ -1,0 +1,31 @@
+/* צבעים, גופן וצללים: קליני ונקי. כל הצבעים במוצר מוגדרים כאן בלבד */
+@theme {
+  --font-sans: "Heebo Variable", "Segoe UI", system-ui, sans-serif;
+
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d6f2ed;
+  --color-brand-200: #ade4db;
+  --color-brand-300: #7bcfc4;
+  --color-brand-400: #48b3a8;
+  --color-brand-500: #2a978d;
+  --color-brand-600: #1d7a73;
+  --color-brand-700: #19625d;
+  --color-brand-800: #174f4b;
+  --color-brand-900: #133f3c;
+
+  --color-ink: #1b2a33;
+  --color-muted: #5f6f7a;
+  --color-line: #e3e9ec;
+  --color-canvas: #f5f8f9;
+
+  --color-review: #f59e0b;
+  --color-review-bg: #fff4e0;
+  --color-review-ink: #9a5a00;
+  --color-ok: #16a34a;
+  --color-ok-bg: #e9f8ef;
+  --color-fail: #dc2626;
+  --color-fail-bg: #fdecec;
+
+  --shadow-card: 0 1px 2px rgb(16 42 51 / 0.04), 0 4px 16px rgb(16 42 51 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(16 42 51 / 0.06), 0 12px 32px rgb(16 42 51 / 0.1);
+}

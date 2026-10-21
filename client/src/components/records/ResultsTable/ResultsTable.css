@@ -1,0 +1,68 @@
+@reference "../../../styles/index.css";
+
+.records {
+  @apply overflow-hidden;
+}
+.records-head {
+  @apply flex flex-col gap-3 border-b border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between;
+}
+.records-title {
+  @apply text-lg font-bold;
+}
+.records-hint {
+  @apply text-sm text-muted;
+}
+
+.records-actions {
+  @apply flex flex-wrap items-center gap-2 sm:shrink-0;
+}
+
+.records-alert {
+  @apply flex items-center justify-between gap-3 border-b border-fail/20 bg-fail-bg px-5 py-2 text-sm text-fail;
+}
+
+.records-empty {
+  @apply flex flex-col items-center gap-3 px-6 py-16 text-center text-muted;
+}
+.records-empty-icon {
+  @apply size-10 text-brand-300;
+}
+
+.records-onboarding {
+  @apply px-5 py-10 sm:px-8;
+}
+.records-onboarding-title {
+  @apply mb-5 text-center font-semibold text-muted;
+}
+.records-steps {
+  @apply mx-auto grid max-w-4xl gap-4 sm:grid-cols-3;
+}
+.records-step {
+  @apply flex gap-3 rounded-xl border border-line bg-canvas/60 p-4;
+}
+.records-step-number {
+  @apply grid size-8 shrink-0 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white;
+}
+.records-step-title {
+  @apply font-semibold;
+}
+.records-step-text {
+  @apply mt-0.5 text-sm text-muted;
+}
+
+.records-more {
+  @apply flex flex-col items-center gap-3 border-t border-line px-5 py-4 text-sm text-muted sm:flex-row
+    sm:justify-between;
+}
+
+/* ריווח תחתון כדי שההסבר שבריחוף לא ייחתך בשורה האחרונה */
+.records-scroll {
+  @apply overflow-x-auto pb-14;
+}
+.records-table {
+  @apply w-full min-w-[1100px] border-collapse text-sm;
+}
+.records-table th {
+  @apply sticky top-0 border-b border-line bg-canvas px-3 py-2.5 text-start text-xs font-semibold whitespace-nowrap
+    text-muted;
+}

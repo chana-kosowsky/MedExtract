@@ -1,0 +1,20 @@
+@reference "../../../styles/index.css";
+
+.wake {
+  @apply flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center;
+}
+.wake-logo {
+  @apply grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lift;
+}
+.wake-logo svg {
+  @apply size-9;
+}
+.wake-title {
+  @apply text-2xl font-bold tracking-tight;
+}
+.wake-spinner {
+  @apply size-6 animate-spin text-brand-600;
+}
+.wake-text {
+  @apply max-w-sm text-muted;
+}

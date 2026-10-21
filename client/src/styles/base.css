@@ -1,0 +1,15 @@
+/* בסיס הדף: רקע, גופן, מיקוד מקלדת */
+@layer base {
+  html {
+    @apply bg-canvas text-ink antialiased;
+  }
+  body {
+    @apply min-h-screen font-sans text-[15px] leading-relaxed;
+  }
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}

@@ -1,0 +1,8 @@
+@reference "../../../styles/index.css";
+
+.export svg {
+  @apply text-ok;
+}
+.export:disabled svg {
+  @apply text-muted;
+}

@@ -1,0 +1,42 @@
+# סודות
+.env
+.env.*
+!.env.example
+
+# טפסי דוגמה, טבלת אמת ותוצרי הערכה (לא נכנסים ל-Git)
+samples/
+eval/truth*
+eval/results/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.heic
+*.webp
+*.bmp
+*.xlsx
+*.csv
+# קובץ נעילה של Office כשטבלת האמת פתוחה
+~$*
+*.log
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node / build
+node_modules/
+client/dist/
+*.tsbuildinfo
+
+# מערכת
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# הגדרות מקומיות של Claude Code
+.claude/

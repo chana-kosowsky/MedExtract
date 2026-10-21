@@ -1,0 +1,58 @@
+@reference "../../../styles/index.css";
+
+.upload {
+  @apply overflow-hidden;
+}
+.upload-drop {
+  @apply m-4 flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-brand-200
+    bg-brand-50/40 px-6 py-12 text-center transition duration-200 hover:border-brand-400 hover:bg-brand-50;
+}
+.upload-drop-active {
+  @apply scale-[1.01] border-brand-500 bg-brand-50;
+}
+.upload-icon {
+  @apply grid size-16 place-items-center rounded-full bg-white text-brand-600 shadow-card;
+}
+.upload-icon svg {
+  @apply size-8;
+}
+.upload-title {
+  @apply text-xl font-bold;
+}
+.upload-hint {
+  @apply text-sm text-muted;
+}
+
+.upload-files {
+  @apply mx-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3;
+}
+.upload-file {
+  @apply flex items-center gap-2 rounded-lg border border-line bg-canvas px-3 py-2 text-sm;
+}
+.upload-file-icon {
+  @apply size-4 shrink-0 text-brand-600;
+}
+.upload-file-name {
+  @apply min-w-0 flex-1 truncate font-medium;
+}
+.upload-file-size {
+  @apply shrink-0 text-xs text-muted;
+}
+.upload-file-remove {
+  @apply rounded-md p-1 text-muted transition hover:bg-fail-bg hover:text-fail;
+}
+
+.upload-error {
+  @apply mx-4 mt-3 rounded-lg bg-fail-bg px-3 py-2 text-sm text-fail;
+}
+
+.upload-footer {
+  @apply mt-4 flex flex-col items-stretch gap-3 border-t border-line bg-canvas/60 px-4 py-3
+    sm:flex-row sm:items-center sm:justify-between;
+}
+.upload-privacy {
+  @apply flex items-center gap-2 text-xs text-muted;
+}
+.upload-start {
+  @apply px-6;
+}

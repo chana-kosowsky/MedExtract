@@ -1,0 +1,72 @@
+@reference "../../../styles/index.css";
+
+.toolbar {
+  @apply flex flex-col gap-3 border-b border-line bg-canvas/50 px-5 py-3;
+}
+.toolbar-row {
+  @apply flex flex-wrap items-center gap-3;
+}
+.toolbar-row-secondary {
+  @apply gap-5;
+}
+
+/* חיפוש */
+.toolbar-search {
+  @apply relative min-w-56 flex-1;
+}
+.toolbar-search input {
+  @apply w-full rounded-xl border border-line bg-white py-2 ps-9 pe-3 text-sm outline-none transition
+    placeholder:text-muted/70 focus:border-brand-400 focus:ring-3 focus:ring-brand-100;
+}
+.toolbar-search-icon {
+  @apply pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted;
+}
+
+.toolbar-select {
+  @apply rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-400
+    focus:ring-3 focus:ring-brand-100;
+}
+
+/* בורר מצב */
+.segmented {
+  @apply inline-flex rounded-xl border border-line bg-white p-1;
+}
+.segment {
+  @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition hover:text-ink;
+}
+.segment-active {
+  @apply bg-brand-600 text-white shadow-sm hover:text-white;
+}
+
+/* מתג */
+.toggle {
+  @apply inline-flex cursor-pointer items-center gap-2 text-sm text-muted select-none;
+}
+.toggle input {
+  @apply sr-only;
+}
+.toggle-track {
+  @apply relative h-5 w-9 rounded-full bg-line transition;
+}
+.toggle-thumb {
+  @apply absolute start-0.5 top-0.5 size-4 rounded-full bg-white shadow transition-all;
+}
+.toggle-on {
+  @apply text-ink;
+}
+.toggle-on .toggle-track {
+  @apply bg-brand-600;
+}
+.toggle-on .toggle-thumb {
+  @apply start-4.5;
+}
+.toggle:has(input:focus-visible) .toggle-track {
+  @apply outline-2 outline-offset-2 outline-brand-500;
+}
+
+.toolbar-count {
+  @apply ms-auto text-xs text-muted;
+}
+.toolbar-clear {
+  @apply px-2 py-1 text-xs;
+}

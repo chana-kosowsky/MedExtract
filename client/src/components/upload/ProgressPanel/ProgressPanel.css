@@ -1,0 +1,98 @@
+@reference "../../../styles/index.css";
+
+.progress {
+  @apply flex flex-col gap-5 p-5 sm:p-6;
+}
+.progress-head {
+  @apply flex items-start justify-between gap-4;
+}
+.progress-title {
+  @apply text-xl font-bold;
+}
+.progress-sub {
+  @apply text-sm text-muted;
+}
+.progress-clock {
+  @apply flex items-center gap-2 rounded-xl bg-brand-50 px-4 py-2 text-2xl font-bold tabular-nums text-brand-700;
+}
+.progress-clock svg {
+  @apply size-5;
+}
+
+.progress-track {
+  @apply h-2.5 overflow-hidden rounded-full bg-line;
+}
+.progress-fill {
+  @apply h-full rounded-full bg-gradient-to-l from-brand-400 to-brand-600 transition-all duration-500;
+}
+.progress-fill-running {
+  @apply animate-pulse;
+}
+
+/* משבצת לכל עמוד */
+.progress-tiles {
+  @apply grid grid-cols-6 gap-2 sm:grid-cols-10 lg:grid-cols-15;
+}
+.tile {
+  @apply flex h-11 items-center justify-center gap-1 rounded-lg border text-xs font-semibold tabular-nums transition;
+}
+.tile svg {
+  @apply size-3.5;
+}
+.tile-done {
+  @apply border-ok/20 bg-ok-bg text-ok;
+}
+.tile-failed {
+  @apply border-fail/20 bg-fail-bg text-fail;
+}
+.tile-current {
+  @apply border-brand-300 bg-brand-50 text-brand-700 shadow-sm;
+}
+.tile-waiting {
+  @apply border-line bg-canvas text-muted/60;
+}
+
+/* השוואה להקלדה ידנית */
+.progress-compare {
+  @apply grid gap-3 sm:grid-cols-3;
+}
+.compare-item {
+  @apply flex flex-col gap-0.5 rounded-xl border border-line px-4 py-3;
+}
+.compare-label {
+  @apply text-xs font-medium text-muted;
+}
+.compare-value {
+  @apply flex items-center gap-1.5 text-lg font-bold tabular-nums;
+}
+.compare-value svg {
+  @apply size-4;
+}
+.compare-manual {
+  @apply text-muted line-through decoration-muted/40;
+}
+.compare-fast {
+  @apply text-brand-700;
+}
+.compare-saved {
+  @apply border-ok/30 bg-ok-bg text-ok;
+}
+.compare-saved .compare-label {
+  @apply text-ok;
+}
+
+.progress-message {
+  @apply flex items-center gap-2 rounded-lg bg-ok-bg px-3 py-2 text-sm font-medium text-ok;
+}
+.progress-message-warn {
+  @apply bg-review-bg text-review-ink;
+}
+.progress-failures {
+  @apply list-disc space-y-1 ps-6 text-sm text-fail;
+}
+.progress-error {
+  @apply rounded-lg bg-fail-bg px-3 py-2 text-sm text-fail;
+}
+.progress-footer {
+  @apply flex flex-wrap justify-end gap-2;
+}

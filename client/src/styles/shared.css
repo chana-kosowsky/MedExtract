@@ -1,0 +1,31 @@
+/* מחלקות משותפות לכל הרכיבים: כרטיס, כפתורים, אייקון */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card;
+  }
+
+  /* שימוש: className="btn btn-primary" */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition duration-150 disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply border border-line bg-white text-ink hover:border-brand-300 hover:bg-brand-50;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-canvas hover:text-ink;
+  }
+  .btn-danger {
+    @apply border border-fail/20 bg-white text-fail hover:bg-fail-bg;
+  }
+
+  .icon-sm {
+    @apply size-4 shrink-0;
+  }
+  .spin {
+    @apply animate-spin;
+  }
+}

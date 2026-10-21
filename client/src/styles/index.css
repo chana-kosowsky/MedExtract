@@ -1,0 +1,6 @@
+/* מחבר את שפת העיצוב. קבצי ה-CSS של הרכיבים מפנים לכאן עם @reference */
+@import "tailwindcss";
+@import "@fontsource-variable/heebo";
+@import "./theme.css";
+@import "./base.css";
+@import "./shared.css";

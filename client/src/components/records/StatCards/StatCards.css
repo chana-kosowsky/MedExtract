@@ -1,0 +1,36 @@
+@reference "../../../styles/index.css";
+
+.stats {
+  @apply grid grid-cols-2 gap-3 lg:grid-cols-4;
+}
+.stat {
+  @apply flex items-center gap-3 px-4 py-4 text-start transition hover:-translate-y-0.5 hover:shadow-lift;
+}
+.stat-active {
+  @apply border-brand-400 ring-3 ring-brand-100;
+}
+.stat-icon {
+  @apply grid size-11 shrink-0 place-items-center rounded-xl;
+}
+.stat-icon svg {
+  @apply size-5;
+}
+.stat-value {
+  @apply text-2xl leading-tight font-bold tabular-nums;
+}
+.stat-label {
+  @apply text-xs text-muted;
+}
+
+.stat-total .stat-icon {
+  @apply bg-brand-50 text-brand-600;
+}
+.stat-approved .stat-icon {
+  @apply bg-ok-bg text-ok;
+}
+.stat-review .stat-icon {
+  @apply bg-review-bg text-review;
+}
+.stat-failed .stat-icon {
+  @apply bg-fail-bg text-fail;
+}

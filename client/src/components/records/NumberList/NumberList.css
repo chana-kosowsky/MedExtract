@@ -1,0 +1,67 @@
+@reference "../../../styles/index.css";
+
+.numbers {
+  @apply border-b border-line px-3 py-2 align-middle;
+}
+.numbers-flagged {
+  @apply bg-review-bg/40;
+}
+.numbers-list {
+  @apply flex flex-wrap items-center gap-1.5;
+}
+.numbers-empty {
+  @apply rounded border border-dashed border-review/60 px-1.5 text-xs font-medium text-review-ink;
+}
+
+/* תגית מספר */
+.chip {
+  @apply relative inline-flex cursor-text items-center gap-1 rounded-md border border-line bg-canvas px-2 py-0.5
+    font-mono text-[13px] font-semibold tabular-nums transition hover:border-brand-300;
+}
+.chip-review {
+  @apply border-review bg-review-bg text-review-ink;
+}
+.chip-flag {
+  @apply size-3.5 text-review;
+}
+.chip-delete {
+  @apply -me-1 hidden rounded p-0.5 text-muted hover:bg-fail-bg hover:text-fail;
+}
+.chip-delete svg {
+  @apply size-3;
+}
+.chip:hover .chip-delete {
+  @apply inline-flex;
+}
+.chip-confirm {
+  @apply hidden rounded p-0.5 text-review-ink hover:bg-ok hover:text-white;
+}
+.chip-confirm svg {
+  @apply size-3;
+}
+.chip:hover .chip-confirm {
+  @apply inline-flex;
+}
+.chip-tip {
+  @apply pointer-events-none invisible absolute start-0 top-full z-20 mt-1 w-max max-w-64 rounded-lg bg-ink px-3 py-2
+    font-sans text-xs font-normal leading-snug text-white opacity-0 shadow-lift transition;
+}
+.chip:hover .chip-tip {
+  @apply visible opacity-100;
+}
+
+.number-input {
+  @apply w-24 rounded-md border border-brand-400 bg-white px-2 py-0.5 font-mono text-[13px] outline-none ring-3
+    ring-brand-100;
+}
+/* כפתור + מופיע רק בריחוף על השורה, כדי שהטבלה תישאר נקייה */
+.numbers-add {
+  @apply grid size-6 place-items-center rounded-md border border-dashed border-line text-muted opacity-0
+    transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-600 focus-visible:opacity-100;
+}
+tr:hover .numbers-add {
+  @apply opacity-100;
+}
+.numbers-add svg {
+  @apply size-3.5;
+}

@@ -1,0 +1,35 @@
+@reference "../../../styles/index.css";
+
+.header-bar {
+  @apply border-b border-line bg-white/90 backdrop-blur;
+}
+.header-inner {
+  @apply mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6;
+}
+.brand {
+  @apply flex items-center gap-3;
+}
+.brand-logo {
+  @apply grid size-11 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md;
+}
+.brand-logo svg {
+  @apply size-6;
+}
+.brand-name {
+  @apply text-xl font-bold tracking-tight;
+}
+.brand-tagline {
+  @apply text-sm text-muted;
+}
+.system-status {
+  @apply hidden items-center gap-2 rounded-full bg-ok-bg px-3 py-1.5 text-xs font-medium text-ok sm:flex;
+}
+.system-status-down {
+  @apply bg-fail-bg text-fail;
+}
+.system-status-dot {
+  @apply size-2 rounded-full bg-current;
+}
+.demo-banner {
+  @apply flex items-center justify-center gap-2 border-b border-review/30 bg-review-bg px-4 py-2 text-center text-sm text-review-ink;
+}

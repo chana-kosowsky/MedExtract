@@ -1,0 +1,67 @@
+@reference "../../../styles/index.css";
+
+.cell {
+  @apply relative border-b border-line px-3 py-2.5 align-middle;
+}
+.cell-editable {
+  @apply cursor-text;
+}
+.cell-ok {
+  @apply bg-white;
+}
+.cell-review {
+  @apply bg-review-bg shadow-[inset_0_0_0_1px_var(--color-review)];
+}
+.cell-missing {
+  @apply bg-review-bg/50;
+}
+
+.cell-content {
+  @apply flex min-h-7 items-center gap-1.5;
+}
+.cell-value {
+  @apply font-medium;
+}
+.cell-empty {
+  @apply rounded border border-dashed border-review/60 px-1.5 text-xs font-medium text-review-ink;
+}
+.cell-flag {
+  @apply size-4 shrink-0 text-review;
+}
+.cell-actions {
+  @apply ms-auto flex shrink-0 items-center gap-1;
+}
+.cell-pencil {
+  @apply size-3.5 shrink-0 text-muted opacity-0 transition;
+}
+.cell-editable:hover .cell-pencil {
+  @apply opacity-100;
+}
+/* ✓ על שדה כתום: מופיע בריחוף, ירוק כשעוברים עליו */
+.cell-confirm {
+  @apply grid size-6 place-items-center rounded-md border border-review/50 bg-white text-review-ink opacity-0
+    transition hover:border-ok hover:bg-ok hover:text-white focus-visible:opacity-100;
+}
+.cell-confirm svg {
+  @apply size-3.5;
+}
+.cell:hover .cell-confirm {
+  @apply opacity-100;
+}
+.cell-spinner {
+  @apply size-3.5 shrink-0 animate-spin text-brand-600;
+}
+
+.cell-input {
+  @apply w-full min-w-24 rounded-md border border-brand-400 bg-white px-2 py-1 font-medium outline-none
+    ring-3 ring-brand-100;
+}
+
+/* הסבר שמופיע בריחוף על שדה לא בטוח */
+.cell-tip {
+  @apply pointer-events-none invisible absolute start-2 top-full z-20 mt-1 w-max max-w-64 rounded-lg bg-ink px-3
+    py-2 text-xs leading-snug text-white opacity-0 shadow-lift transition;
+}
+.cell:hover .cell-tip {
+  @apply visible opacity-100;
+}

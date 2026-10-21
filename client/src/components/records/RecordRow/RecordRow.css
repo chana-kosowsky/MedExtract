@@ -1,0 +1,40 @@
+@reference "../../../styles/index.css";
+
+.row {
+  @apply transition-colors;
+}
+.row-approved td {
+  @apply bg-ok-bg/30;
+}
+.row-approved .cell-review,
+.row-approved .cell-missing {
+  @apply bg-review-bg/60;
+}
+
+.row-status {
+  @apply cursor-pointer border-b border-line px-3 py-2.5 align-middle;
+}
+.row-source {
+  @apply mt-1 block text-[11px] whitespace-nowrap text-muted;
+}
+
+.row-failed-message {
+  @apply border-b border-line bg-fail-bg/40 px-3 py-2.5 align-middle text-sm text-fail;
+}
+.row-failed-message svg {
+  @apply me-1.5 inline;
+}
+
+.row-action {
+  @apply border-b border-line px-3 py-2.5 text-end align-middle;
+}
+.row-buttons {
+  @apply flex items-center justify-end gap-1;
+}
+.row-open {
+  @apply px-2 py-1.5;
+}
+.row-approve {
+  @apply border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs text-brand-700 hover:border-brand-600
+    hover:bg-brand-600 hover:text-white;
+}
