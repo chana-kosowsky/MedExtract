@@ -40,3 +40,8 @@ Thumbs.db
 .idea/
 # הגדרות מקומיות של Claude Code
 .claude/
+
+# מסמכי פיתוח פנימיים (תוכנית, החלטות, הוראות לעוזר הקוד): לא נכנסים למאגר
+CLAUDE.md
+PLAN.md
+docs/
