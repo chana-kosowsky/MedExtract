@@ -8,6 +8,12 @@ from sqlmodel import SQLModel
 from app import db
 
 
+@pytest.fixture(autouse=True)
+def login_off(monkeypatch):
+    """הבדיקות רצות בלי כניסה (גם אם ב-.env מוגדר משתמש); בדיקות הכניסה מגדירות אותו בעצמן."""
+    monkeypatch.delenv("LOGIN_USER", raising=False)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def test_schema():
     """כל הבדיקות רצות בסכמה זמנית נפרדת שנמחקת בסוף, ולא נוגעות בטבלאות האמיתיות."""

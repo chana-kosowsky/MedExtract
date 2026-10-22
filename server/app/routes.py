@@ -2,12 +2,13 @@ import logging
 import re
 from datetime import datetime
 
-from fastapi import APIRouter, Header, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from starlette.datastructures import UploadFile
 from starlette.formparsers import MultiPartParser
 
 from . import db, export, pipeline
+from .auth import require_login
 from .extractor import ExtractionError, build_extractor
 from .validation import SENDERS, short_sender_name
 
@@ -16,7 +17,7 @@ log = logging.getLogger("medextract")
 # קבצים עד התקרה נשארים בזיכרון ולא נכתבים לקובץ זמני (ברירת המחדל: דיסק מעל 1MB)
 MultiPartParser.max_file_size = pipeline.MAX_TOTAL_BYTES
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", dependencies=[Depends(require_login)])  # כל הנתונים רק אחרי כניסה
 
 EXPORT_MAX = 5000
 XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

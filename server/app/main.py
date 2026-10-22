@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db
+from . import auth, db
 from .routes import router
 
 logging.basicConfig()
@@ -26,6 +26,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="MedExtract", lifespan=lifespan)
+app.include_router(auth.router)
 app.include_router(router)
 
 

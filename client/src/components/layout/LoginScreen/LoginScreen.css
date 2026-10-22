@@ -1,0 +1,53 @@
+@reference "../../../styles/index.css";
+
+.login {
+  @apply flex min-h-screen items-center justify-center px-4 py-10;
+}
+.login-card {
+  @apply flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-line bg-white p-6 shadow-lift sm:p-8;
+}
+.login-brand {
+  @apply mb-2 flex flex-col items-center gap-2 text-center;
+}
+.login-logo {
+  @apply grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md;
+}
+.login-logo svg {
+  @apply size-8;
+}
+.login-title {
+  @apply text-2xl font-bold tracking-tight;
+}
+.login-subtitle {
+  @apply text-sm text-muted;
+}
+.login-field {
+  @apply flex flex-col gap-1.5 text-sm font-medium;
+}
+.login-input {
+  @apply rounded-xl border border-line bg-white px-3 py-2.5 text-base outline-none transition focus:border-brand-400
+    focus:ring-3 focus:ring-brand-100;
+}
+.login-error {
+  @apply rounded-lg bg-fail-bg px-3 py-2 text-sm text-fail;
+}
+.login-submit {
+  @apply mt-1 w-full justify-center py-2.5;
+}
+/* פרטי הדמו: לחיצה ממלאת את השדות */
+.login-demo {
+  @apply flex cursor-pointer items-start gap-2 rounded-xl border border-brand-200 bg-brand-50 px-3 py-2.5 text-start text-sm
+    text-brand-700 transition hover:border-brand-400;
+}
+.login-demo svg {
+  @apply mt-0.5 shrink-0;
+}
+.login-demo-text {
+  @apply flex flex-col gap-1;
+}
+.login-demo-value {
+  @apply rounded bg-white px-1.5 font-mono font-semibold;
+}
+.login-demo-fill {
+  @apply text-xs text-brand-600/80;
+}

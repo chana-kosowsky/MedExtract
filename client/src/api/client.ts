@@ -1,4 +1,7 @@
-import type { Commitment, CommitmentList, Job, ListParams, NumberKind, SingleField } from "./types";
+import type { Commitment, CommitmentList, Job, ListParams, NumberKind, Session, SingleField } from "./types";
+
+/** אירוע בדפדפן כשהשרת דחה בקשה כי הכניסה פגה: האפליקציה חוזרת למסך הכניסה. */
+export const SESSION_EXPIRED = "medextract:session-expired";
 
 /** שגיאה מהשרת, עם הודעה בעברית להצגה וקוד ה-HTTP (0 = אין חיבור). */
 export class ApiError extends Error {
@@ -31,6 +34,7 @@ async function call(path: string, init?: RequestInit): Promise<Response> {
     throw new ApiError(NO_CONNECTION);
   }
   if (!res.ok) {
+    if (res.status === 401 && path !== "/api/login") window.dispatchEvent(new Event(SESSION_EXPIRED));
     const body = await res.json().catch(() => null);
     const detail = body && typeof body.detail === "string" ? body.detail : null;
     throw new ApiError(detail ?? statusMessage(res.status), res.status);
@@ -66,6 +70,12 @@ export async function checkHealth(): Promise<boolean> {
   const body = await res.json().catch(() => ({}));
   return body.db === "ok";
 }
+
+export const auth = {
+  session: () => request<Session>("/api/session"),
+  login: (username: string, password: string) => json<void>("/api/login", "POST", { username, password }),
+  logout: () => json<void>("/api/logout", "POST"),
+};
 
 /** המשך העלאה שנעצרה: ההעלאה המקורית והעמודים שכבר עובדו. */
 export interface ResumeInfo {

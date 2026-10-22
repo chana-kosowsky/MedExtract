@@ -6,6 +6,13 @@ export type JobState = "running" | "done" | "cancelled" | "quota_stopped" | "err
 export type SingleField = "first_name" | "last_name" | "id_number" | "received_date" | "sender";
 export type NumberKind = "central" | "commitment";
 
+/** מצב הכניסה: האם צריך להתחבר, מי מחובר, ופרטי משתמש הדמו להצגה (אם השרת מציג אותם). */
+export interface Session {
+  required: boolean;
+  user: string | null;
+  demo: { username: string; password: string } | null;
+}
+
 /** מיקום בעמוד [x0, y0, x1, y1], ביחס לגודל הדף (0-1). */
 export type Box = [number, number, number, number];
 
