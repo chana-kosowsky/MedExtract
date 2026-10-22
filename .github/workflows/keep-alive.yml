@@ -1,0 +1,17 @@
+# שומר את הדמו ער: Render החינמי נרדם אחרי 15 דקות בלי בקשות, ו-Supabase החינמי נעצר אחרי שבוע בלי פעילות.
+# /health בודק גם את המסד, כך שהפינג שומר את שניהם פעילים. כל 5 דקות, כי GitHub מעכב לפעמים משימות מתוזמנות.
+# אם הבדיקה נכשלת (השרת או המסד לא עונים), GitHub שולח מייל על הריצה שנכשלה.
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # הפעלה ידנית מלשונית Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Ping /health
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 20 --max-time 90 https://medextract-pszj.onrender.com/health
