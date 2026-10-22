@@ -27,8 +27,8 @@ from openpyxl.styles import Font, PatternFill
 from app.extractor import (AnthropicExtractor, ChainExtractor, ExtractionError, GeminiExtractor,
                            build_extractor)
 from app import pipeline
-from app.barcodes import Barcode, read_barcodes, reconcile
-from app.pipeline import extract_with_retry, render_pdf_page
+from app.barcodes import Barcode, reconcile
+from app.pipeline import extract_with_retry, pdf_barcodes, render_pdf_page
 from app.schema import ExtractedForm, FieldStatus, ModelField, ModelOutput
 from app.validation import build_form, match_sender, parse_date
 
@@ -126,7 +126,7 @@ def run_series(pdf: str, pages: list[int], runs: int, model: str | None = None,
                 try:
                     image, mime = render_pdf_page(doc, page - 1)
                     form = extract_with_retry(ex, image, mime, page, never)
-                    codes = read_barcodes(image)
+                    codes = pdf_barcodes(doc, page - 1)  # כמו בשרת: ברקודים מציור ב-300 DPI
                     form = reconcile(form, codes)
                     out["results"][page] = {"form": form.model_dump(mode="json"), "model": form.model,
                                             "raw": ex.last_raw.model_dump(mode="json"),

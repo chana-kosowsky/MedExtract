@@ -35,6 +35,7 @@ class Barcode:
 
 
 UPSCALE = 1.5  # ניסיון שני על תמונה מוגדלת, כשמדבקה מרכזית לא נקראה ברזולוציה הרגילה
+UPSCALE_MAX_SIDE = 2000  # עמוד PDF ב-300 DPI כבר גדול מזה (2480): בלי הגדלה, שחוסכת זיכרון וזמן
 
 
 def _scan(img: Image.Image, found: dict[str, Barcode]) -> None:
@@ -52,13 +53,13 @@ def _scan(img: Image.Image, found: dict[str, Barcode]) -> None:
         found.setdefault(b.text.strip(), Barcode(b.text.strip(), kind, width / side, box))
 
 
-def read_barcodes(image: bytes) -> list[Barcode]:
+def read_barcodes(image: bytes | Image.Image) -> list[Barcode]:
     """קוראת את כל הברקודים בתמונת העמוד, בזיכרון בלבד. כשל בקריאה מחזיר רשימה ריקה."""
     try:
-        img = Image.open(io.BytesIO(image))
+        img = image if isinstance(image, Image.Image) else Image.open(io.BytesIO(image))
         found: dict[str, Barcode] = {}
         _scan(img, found)
-        if not any(b.is_central for b in found.values()):
+        if not any(b.is_central for b in found.values()) and min(img.size) < UPSCALE_MAX_SIDE:
             _scan(img.resize((round(img.width * UPSCALE), round(img.height * UPSCALE))), found)
         return list(found.values())
     except Exception as e:

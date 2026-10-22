@@ -87,6 +87,34 @@ def test_pdf_with_blank_and_broken_pages(monkeypatch):
     assert job.results[3].form.source_page == 4
 
 
+def test_pdf_barcodes_read_at_high_resolution():
+    """בעמוד PDF הברקודים נקראים מציור נפרד ב-300 DPI: ברקוד דק שלא נקרא בתמונה שנשלחת למודל (200 DPI)."""
+    import zxingcpp
+
+    code = Image.fromarray(zxingcpp.write_barcode(zxingcpp.BarcodeFormat.Code39, "7254647", width=0, height=40))
+    buf = io.BytesIO()
+    code.save(buf, "PNG")
+    doc = pymupdf.open()
+    page = doc.new_page()
+    page.draw_rect(pymupdf.Rect(50, 50, 300, 200), fill=(0, 0, 0))  # שהעמוד לא ייחשב ריק
+    # פס צר של חצי נקודה: כ-1.4 פיקסלים ב-200 DPI (לא נקרא), כ-2 ב-300 DPI (נקרא)
+    page.insert_image(pymupdf.Rect(100, 600, 100 + code.width * 0.5, 640), stream=buf.getvalue())
+    with pymupdf.open(stream=doc.tobytes(), filetype="pdf") as pdf:
+        image, _ = pipeline.render_pdf_page(pdf, 0)
+        assert "7254647" not in {b.text for b in pipeline.read_barcodes(image)}  # ב-200 DPI: לא נקרא
+        assert "7254647" in {b.text for b in pipeline.pdf_barcodes(pdf, 0)}       # ב-300 DPI: נקרא
+
+
+def test_run_job_uses_high_resolution_barcodes(monkeypatch):
+    """הצינור משתמש בברקודים מהציור ברזולוציה הגבוהה לעמודי PDF, ומהתמונה עצמה לתמונות."""
+    used = []
+    monkeypatch.setattr(pipeline, "pdf_barcodes", lambda doc, i: used.append("pdf") or [])
+    real = pipeline.read_barcodes
+    monkeypatch.setattr(pipeline, "read_barcodes", lambda img: used.append("image") or real(img))
+    run([make_pdf(["form"]), make_photo(False)])
+    assert used == ["pdf", "image"]
+
+
 def test_broken_and_unsupported_files_do_not_stop_others():
     """קובץ פגום וקובץ מסוג לא נתמך לא עוצרים את הקבצים האחרים."""
     job = run([b"%PDF-1.4 garbage", b"plain text", make_pdf(["form"]), b"\xff\xd8\xff broken"])

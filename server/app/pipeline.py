@@ -11,7 +11,7 @@ import pymupdf
 from PIL import Image, ImageOps
 from pydantic import BaseModel
 
-from .barcodes import read_barcodes, reconcile
+from .barcodes import Barcode, read_barcodes, reconcile
 from .extractor import ExtractionError, FieldExtractor
 from .schema import ExtractedForm
 
@@ -159,6 +159,19 @@ def render_pdf_page(doc: pymupdf.Document, index: int) -> tuple[bytes, str]:
     return pix.tobytes("png"), "image/png"
 
 
+BARCODE_DPI = 300  # ברקודים דקים (Code 39 של מספרי התחייבות) לא נקראים ב-200 DPI. נמדד על 22 עמודים.
+
+
+def pdf_barcodes(doc: pymupdf.Document, index: int) -> list[Barcode]:
+    """קוראת את הברקודים בעמוד PDF מציור נפרד ברזולוציה גבוהה (התמונה למודל לא משתנה). בזיכרון בלבד."""
+    try:
+        pix = doc[index].get_pixmap(dpi=BARCODE_DPI)
+        img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+    except Exception:
+        return []
+    return read_barcodes(img)
+
+
 def prepare_photo(data: bytes) -> tuple[bytes, str]:
     """פותחת תמונה, מיישרת לפי EXIF ומחזירה JPEG בזיכרון."""
     try:
@@ -179,24 +192,24 @@ def _fail(code: str, message: str):
 
 
 def iter_pages(files: list[bytes]):
-    """עוברת על כל העמודים בכל הקבצים: (מספר קובץ, עמוד, פונקציה שמכינה את התמונה)."""
+    """עוברת על כל העמודים בכל הקבצים: (מספר קובץ, עמוד, הכנת התמונה, קריאת ברקודים או None לקריאה מהתמונה)."""
     for fi, data in enumerate(files, 1):
         kind = sniff(data)
         if kind is None:
-            yield fi, 1, _fail("bad_type", "סוג קובץ לא נתמך. אפשר להעלות PDF, JPEG, PNG או WebP.")
+            yield fi, 1, _fail("bad_type", "סוג קובץ לא נתמך. אפשר להעלות PDF, JPEG, PNG או WebP."), None
         elif kind != "pdf":
-            yield fi, 1, lambda data=data: prepare_photo(data)
+            yield fi, 1, lambda data=data: prepare_photo(data), None
         else:
             try:
                 doc = pymupdf.open(stream=data, filetype="pdf")
             except Exception:
-                yield fi, 1, _fail("bad_file", "הקובץ פגום ולא ניתן לפתוח אותו.")
+                yield fi, 1, _fail("bad_file", "הקובץ פגום ולא ניתן לפתוח אותו."), None
                 continue
             with doc:
                 if doc.page_count == 0:
-                    yield fi, 1, _fail("bad_file", "בקובץ אין עמודים.")
+                    yield fi, 1, _fail("bad_file", "בקובץ אין עמודים."), None
                 for i in range(doc.page_count):
-                    yield fi, i + 1, lambda i=i: render_pdf_page(doc, i)
+                    yield fi, i + 1, lambda i=i: render_pdf_page(doc, i), lambda i=i: pdf_barcodes(doc, i)
 
 
 # ---------- עיבוד ----------
@@ -231,10 +244,11 @@ def extract_with_retry(extractor: FieldExtractor, image: bytes, mime: str, page:
 
 
 def extract_page(extractor: FieldExtractor, image: bytes, mime: str, page: int,
-                 cancel: threading.Event) -> ExtractedForm:
-    """קריאת עמוד במודל, ואז הצלבת המספרים עם הברקודים שבעמוד (מקומית, בלי מודל)."""
+                 cancel: threading.Event, scan=None) -> ExtractedForm:
+    """קריאת עמוד במודל, ואז הצלבת המספרים עם הברקודים שבעמוד (מקומית, בלי מודל).
+    scan: קריאת ברקודים ברזולוציה גבוהה (עמוד PDF); בלעדיה הברקודים נקראים מהתמונה שנשלחה למודל."""
     form = extract_with_retry(extractor, image, mime, page, cancel)
-    return reconcile(form, read_barcodes(image))
+    return reconcile(form, scan() if scan else read_barcodes(image))
 
 
 def _failed(fi: int, page: int, e: ExtractionError) -> PageResult:
@@ -257,7 +271,7 @@ def run_job(job: Job, files: list[bytes], extractor: FieldExtractor) -> None:
     """מעבדת את כל העמודים לפי הסדר; כשל בעמוד לא עוצר את השאר."""
     quota_error = None
     try:
-        for fi, page, prepare in iter_pages(files):
+        for fi, page, prepare, scan in iter_pages(files):
             if (fi, page) in job.skip:
                 continue
             if job.cancel.is_set():
@@ -269,7 +283,7 @@ def run_job(job: Job, files: list[bytes], extractor: FieldExtractor) -> None:
             try:
                 image, mime = prepare()
                 result = PageResult(file_index=fi, page=page, ok=True,
-                                    form=extract_page(extractor, image, mime, page, job.cancel))
+                                    form=extract_page(extractor, image, mime, page, job.cancel, scan))
             except Cancelled:
                 break
             except ExtractionError as e:
