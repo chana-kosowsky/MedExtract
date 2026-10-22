@@ -4,6 +4,8 @@
                                                                      מריץ את המודל, שומר ומחשב ציון
     python eval/evaluate.py score [תיקיית סדרה] [--pages 1-10]        ציון מחדש מתוצאות שמורות, בלי מודל
     python eval/evaluate.py site [--batch מזהה] [--file 1]           ציון להעלאה שנעשתה באתר (מהמסד, בלי מודל)
+    python eval/evaluate.py truth                                     הצגת טבלת האמת כפי שהיא נקראת, לבדיקה
+לכל הפקודות: --truth eval/truth_part1.xlsx (טבלת אמת אחרת), --truth-block "חלק 1" (חלק בגיליון עם כמה קבצים)
 התוצאות נשמרות ב-eval/results/ (לא נכנס ל-Git), כולל report.xlsx עם רשימת אי-ההתאמות לבדיקה.
 """
 import json
@@ -55,16 +57,70 @@ def parse_pages(spec: str) -> list[int]:
     return pages
 
 
-def load_truth() -> dict[int, dict[str, str]]:
-    """קוראת את טבלת האמת: עמוד -> {שם עמודה: ערך}."""
-    ws = openpyxl.load_workbook(TRUTH)["טבלת אמת"]
-    headers = [c.value for c in ws[1]]
-    rows = {}
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        rec = {h: ("" if v is None else str(v).strip()) for h, v in zip(headers, row)}
-        if rec["עמוד"].isdigit():
+TRUTH_BLOCK: str | None = None  # בגיליון עם כמה קבצים: איזה חלק (ערך עמודת "קובץ"); ברירת מחדל: הראשון
+# שמות עמודות חלופיים בטבלאות אמת שהוכנו בתבנית אחרת
+COLUMN_ALIASES = {"מספר מרכזי": "מספרים מרכזיים", "מספר התחייבות": "מספרי התחייבות", "תז": "ת\"ז"}
+EXCEL_CONVERTED = "_converted"  # עמודות שאקסל שמר כמספר או כתאריך (לבדיקה בעיניים)
+
+
+def _cell_text(v) -> tuple[str, bool]:
+    """תא כטקסט, ואם אקסל שמר אותו כמספר או כתאריך (אז אפס מוביל או סדר יום/חודש עלולים להשתבש)."""
+    if v is None:
+        return "", False
+    if isinstance(v, datetime):
+        return v.strftime("%d/%m/%Y"), True
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v)), True
+    if isinstance(v, (int, float)):
+        return str(v), True
+    return str(v).strip(), False
+
+
+def load_truth(path: Path | None = None, block: str | None = None,
+               with_flags: bool = False) -> dict[int, dict[str, str]]:
+    """קוראת טבלת אמת: עמוד -> {שם עמודה: ערך}. תומכת גם בגיליון עם כמה חלקים (כותרת "עמוד" לכל חלק)."""
+    wb = openpyxl.load_workbook(path or TRUTH)
+    ws = wb["טבלת אמת"] if "טבלת אמת" in wb.sheetnames else wb.worksheets[0]
+    block = block if block is not None else TRUTH_BLOCK
+    blocks: list[tuple[str, dict]] = []  # (שם החלק, עמוד -> רשומה)
+    headers = None
+    for row in ws.iter_rows(values_only=True):
+        cells = [_cell_text(v) for v in row]
+        texts = [t for t, _ in cells]
+        if "עמוד" in texts:  # שורת כותרות: מתחיל חלק חדש
+            headers = [COLUMN_ALIASES.get(t, t) for t in texts]
+            blocks.append(("", {}))
+            continue
+        if not headers:
+            continue
+        rec = {h: t for h, t in zip(headers, texts) if h}
+        converted = {h for h, (_, c) in zip(headers, cells) if h and c and h not in ("עמוד", "קובץ")}
+        name, rows = blocks[-1]
+        if rec.get("קובץ") and not name:
+            blocks[-1] = (rec["קובץ"], rows)
+        if rec.get("עמוד", "").isdigit():
+            if with_flags:
+                rec[EXCEL_CONVERTED] = converted
             rows[int(rec["עמוד"])] = rec
-    return rows
+    if not blocks:
+        sys.exit("בטבלת האמת לא נמצאה שורת כותרות עם העמודה 'עמוד'.")
+    if block is None:
+        return blocks[0][1]
+    for name, rows in blocks:
+        if name == block:
+            return rows
+    sys.exit(f"בטבלת האמת אין חלק '{block}'. החלקים: {', '.join(n or '(בלי שם)' for n, _ in blocks)}")
+
+
+def show_truth(path: Path, block: str | None) -> None:
+    """מציגה את טבלת האמת כפי שהסקריפט קורא אותה, ומסמנת ב-* תאים שאקסל שמר כמספר או כתאריך."""
+    rows = load_truth(path, block, with_flags=True)
+    print(f"{path.name} · חלק: {block or 'הראשון'} · {len(rows)} עמודים")
+    print("* = אקסל שמר את התא כמספר או כתאריך: לבדוק אפס מוביל ושהיום והחודש לא התחלפו\n")
+    for page, rec in sorted(rows.items()):
+        flags = rec.get(EXCEL_CONVERTED, set())
+        parts = [f"{label}: {rec.get(label, '') or '—'}{'*' if label in flags else ''}" for _, label in FIELDS]
+        print(f"עמוד {page:>2} | " + " | ".join(parts))
 
 
 def truth_value(attr: str, text: str):
@@ -402,7 +458,16 @@ def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     logging.basicConfig(level=logging.INFO, format="  [log] %(message)s")  # ניסיונות חוזרים, בלי תוכן
     args = sys.argv[1:]
-    if args[:1] == ["run"] and len(args) >= 3:
+    global TRUTH, TRUTH_BLOCK
+    if "--truth" in args:  # טבלת אמת אחרת (למשל של חלק 1), לכל הפקודות
+        TRUTH = Path(args.pop(args.index("--truth") + 1))
+        args.remove("--truth")
+    if "--truth-block" in args:  # בגיליון עם כמה קבצים: איזה חלק
+        TRUTH_BLOCK = args.pop(args.index("--truth-block") + 1)
+        args.remove("--truth-block")
+    if args[:1] == ["truth"]:
+        show_truth(TRUTH, TRUTH_BLOCK)
+    elif args[:1] == ["run"] and len(args) >= 3:
         runs = int(args[args.index("--runs") + 1]) if "--runs" in args else 3
         model = args[args.index("--model") + 1] if "--model" in args else None
         resolution = args[args.index("--media-resolution") + 1] if "--media-resolution" in args else None
