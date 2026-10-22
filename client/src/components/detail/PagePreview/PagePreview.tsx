@@ -47,9 +47,9 @@ export default function PagePreview({ file, page, sample, focus = null }: Props)
   useEffect(() => setZoom(0), [file, page]);
   useEffect(() => setLoaded(false), [image.url]);
 
-  // שדה חדש מסומן: הגדלה (אם עוד לא מוגדל) וגלילה כך שהשדה במרכז
+  // שדה חדש מסומן: הגדלה (אם עוד לא מוגדל) וגלילה כך שהשדה במרכז. הסימון ירד (יציאה מעריכה): חזרה לגודל רגיל
   useEffect(() => {
-    if (frame) setZoom((z) => Math.max(z, FOCUS_ZOOM));
+    setZoom((z) => (frame ? Math.max(z, FOCUS_ZOOM) : 0));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- לפי המיקום עצמו, לא לפי אובייקט חדש
   }, [focus?.join()]);
 

@@ -144,6 +144,12 @@ def delete_commitment(record_id: str):
     _call(db.delete_commitment, record_id)
 
 
+@router.post("/commitments/{record_id}/sibling", status_code=201)
+def add_sibling(record_id: str):
+    """רשומה נוספת מאותו עמוד, להתחייבות שהמודל לא הפריד."""
+    return _call(db.add_sibling, record_id)
+
+
 @router.patch("/commitments/{record_id}/fields/{field}")
 def correct_field(record_id: str, field: str, body: ValueIn):
     """תיקון שדה בודד (הערך החדש נבדק בקוד)."""

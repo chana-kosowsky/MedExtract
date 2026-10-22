@@ -419,6 +419,27 @@ def delete_commitment(record_id: str) -> None:
     log.info("commitment=%s deleted", record_id)
 
 
+def add_sibling(record_id: str) -> dict:
+    """רשומה נוספת מאותו עמוד (התחייבות שהמודל איחד): אותם פרטים ומספרים מרכזיים, בלי מספר התחייבות."""
+    with _session() as s:
+        src = _editable(s, record_id)
+        c = Commitment(kind=src.kind, batch_id=src.batch_id, source_file=src.source_file,
+                       source_page=src.source_page, page_rotation=src.page_rotation)
+        for f in SINGLE_FIELDS:
+            for p in ("value", "raw", "status", "reason", "box"):
+                setattr(c, f"{f}_{p}", getattr(src, f"{f}_{p}"))
+        numbers = [CommitmentNumber(commitment_id=c.id, kind=n.kind, position=n.position, value=n.value,
+                                    raw_value=n.raw_value, status=n.status, review_reason=n.review_reason, box=n.box)
+                   for n in _numbers(s, src.id) if n.kind == "central"]
+        _refresh(c, numbers)
+        s.add(c)
+        s.flush()
+        s.add_all(numbers)
+        s.commit()
+        log.info("commitment=%s added from=%s", c.id, src.id)
+        return _to_dict(c, numbers)
+
+
 def approve(record_id: str) -> dict:
     """מאשרת רשומה (האדם הוא הסמכות: אפשר לאשר גם עם שדות לבדיקה)."""
     with _session() as s:

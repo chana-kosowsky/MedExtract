@@ -13,14 +13,14 @@ export function boxOf(r: Commitment, key: FocusKey | null): Box | null {
   return r[key as SingleField].box ?? null;
 }
 
-/** השדה הראשון שדורש בדיקה ויש לו מיקום, לפי סדר השדות במסך (כדי לסמן אותו כשהלוח נפתח). */
-export function firstFlagged(r: Commitment, order: (SingleField | "central" | "commitment")[]): FocusKey | null {
-  const flagged = (f: FieldValue) => f.status === "review" && !!f.box;
+/** השדה הראשון שידוע איפה הוא כתוב, לפי סדר השדות במסך (בדרך כלל השם הפרטי), כדי לסמן אותו כשהלוח נפתח. */
+export function firstLocated(r: Commitment, order: (SingleField | "central" | "commitment")[]): FocusKey | null {
+  const located = (f: FieldValue) => !!f.box;
   for (const key of order) {
     if (key === "central" || key === "commitment") {
-      const n = (key === "central" ? r.central_numbers : r.commitment_numbers).find(flagged);
+      const n = (key === "central" ? r.central_numbers : r.commitment_numbers).find(located);
       if (n) return `n${n.id}`;
-    } else if (flagged(r[key])) {
+    } else if (located(r[key])) {
       return key;
     }
   }

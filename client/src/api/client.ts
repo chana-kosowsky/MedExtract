@@ -114,6 +114,7 @@ export const commitments = {
     json<Commitment>(`/api/commitments/${id}/numbers/${numberId}/confirm`, "POST"),
   approve: (id: string) => json<Commitment>(`/api/commitments/${id}/approve`, "POST"),
   remove: (id: string) => call(`/api/commitments/${id}`, { method: "DELETE" }),
+  addSibling: (id: string) => json<Commitment>(`/api/commitments/${id}/sibling`, "POST"),
   approveSafe: (batchId?: string) =>
     json<{ approved: number }>(`/api/commitments/approve-safe${batchId ? `?batch_id=${batchId}` : ""}`, "POST"),
 };

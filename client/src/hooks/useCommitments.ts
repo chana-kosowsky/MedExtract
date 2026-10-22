@@ -95,6 +95,23 @@ export function useCommitments(params: ListParams = {}, notify?: Notify) {
         return false;
       }
     },
+    // רשומה נוספת מאותו עמוד: נכנסת מיד אחרי המקור, ומוחזר המזהה שלה כדי לפתוח אותה
+    addSibling: async (id: string) => {
+      setError(null);
+      try {
+        const added = await api.addSibling(id);
+        setData((d) => {
+          const at = d.items.findIndex((c) => c.id === id) + 1;
+          return { ...d, total: d.total + 1, items: [...d.items.slice(0, at), added, ...d.items.slice(at)] };
+        });
+        notify?.("נוספה רשומה מאותו עמוד. אפשר להקליד את מספר ההתחייבות");
+        refresh();
+        return added.id;
+      } catch (e) {
+        setError(e instanceof ApiError ? e.message : "ההוספה נכשלה.");
+        return null;
+      }
+    },
     approveSafe: async () => {
       setError(null);
       try {

@@ -173,6 +173,24 @@ def test_delete_record(client):
     assert client.delete(f"/api/commitments/{sample}").status_code == 403
 
 
+def test_add_sibling_from_same_page(client):
+    """רשומה נוספת מאותו עמוד: אותם פרטים, מיקומים ומספרים מרכזיים, בלי מספר התחייבות, ממתינה ולבדיקה."""
+    form = make_form()
+    form.id_number.box = [0.1, 0.2, 0.3, 0.25]
+    rid = db.save_form(form, "b1", 2)
+    client.post(f"/api/commitments/{rid}/approve")
+    r = client.post(f"/api/commitments/{rid}/sibling")
+    assert r.status_code == 201
+    new = r.json()
+    assert new["id"] != rid and (new["batch_id"], new["source_file"], new["source_page"]) == ("b1", 2, 1)
+    assert new["id_number"]["value"] == "011223344" and new["id_number"]["box"] == [0.1, 0.2, 0.3, 0.25]
+    assert [n["value"] for n in new["central_numbers"]] == ["947468", "947469"]
+    assert new["commitment_numbers"] == [] and new["needs_review"] and new["state"] == "pending"
+    assert client.get(f"/api/commitments/{rid}").json()["state"] == "approved"  # המקור לא השתנה
+    sample = db.save_form(make_form(), None, 1, kind=RecordKind.sample.value)
+    assert client.post(f"/api/commitments/{sample}/sibling").status_code == 403
+
+
 def test_confirm_field_clears_flag_even_if_check_fails(client):
     """אישור שדה: הכתום יורד גם בת"ז עם ספרת ביקורת שגויה; הרשומה נשארת ממתינה."""
     rid = db.save_form(make_form(id_number=fv("11223345", REVIEW, "ספרת ביקורת לא תקינה")), "b1", 1)

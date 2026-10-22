@@ -32,10 +32,15 @@
 .cell-actions {
   @apply ms-auto flex shrink-0 items-center gap-1;
 }
-.cell-pencil {
-  @apply size-3.5 shrink-0 text-muted opacity-0 transition;
+/* עיפרון: כפתור אמיתי שנראה לחיץ, מופיע בריחוף על התא */
+.cell-edit {
+  @apply grid size-6 shrink-0 cursor-pointer place-items-center rounded-md border border-line bg-white text-muted
+    opacity-0 transition hover:border-brand-400 hover:bg-brand-50 hover:text-brand-600 focus-visible:opacity-100;
 }
-.cell-editable:hover .cell-pencil {
+.cell-edit svg {
+  @apply size-3.5;
+}
+.cell-editable:hover .cell-edit {
   @apply opacity-100;
 }
 /* ✓ על שדה כתום: מופיע בריחוף, ירוק כשעוברים עליו */

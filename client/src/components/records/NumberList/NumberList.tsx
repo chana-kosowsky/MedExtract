@@ -13,6 +13,7 @@ interface Props {
   onAdd: (value: string) => Promise<boolean>;
   onDelete: (numberId: number) => Promise<boolean>;
   onConfirm?: (numberId: number) => Promise<boolean>;
+  onEditEnd?: () => void; // יציאה מעריכת מספר (שמירה, ביטול או ✓)
 }
 
 /** שדה קטן לעריכת מספר: Enter שומר, Esc מבטל. */
@@ -37,12 +38,13 @@ function NumberInput({ initial, onDone }: { initial: string; onDone: (value: str
 
 /** תא עם רשימת מספרים כתגיות: לחיצה מתקנת, ✓ מאשר מספר כתום, X מוחק, + מוסיף (עד max). רשימה ריקה מסומנת. */
 export default function NumberList(props: Props) {
-  const { numbers, readOnly, max = Infinity, as: Tag = "td", onCorrect, onAdd, onDelete, onConfirm } = props;
+  const { numbers, readOnly, max = Infinity, as: Tag = "td", onCorrect, onAdd, onDelete, onConfirm, onEditEnd } = props;
   const [editing, setEditing] = useState<number | "new" | null>(null);
   const flagged = numbers.length === 0 || numbers.some((n) => n.status !== "ok");
 
   async function finish(id: number | "new", value: string | null) {
     setEditing(null);
+    onEditEnd?.();
     if (value === null) return;
     if (id === "new") await onAdd(value);
     else if (value !== numbers.find((n) => n.id === id)?.value) await onCorrect(id, value);
@@ -71,7 +73,7 @@ export default function NumberList(props: Props) {
                   title="המספר נכון"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onConfirm(n.id);
+                    onConfirm(n.id).then(() => onEditEnd?.());
                   }}
                 >
                   <Check />

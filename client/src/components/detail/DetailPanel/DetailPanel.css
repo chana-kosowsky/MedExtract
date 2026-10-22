@@ -88,6 +88,9 @@
 .detail-approve {
   @apply ms-auto flex items-center gap-3;
 }
+.detail-manage {
+  @apply flex flex-wrap items-center gap-1;
+}
 .detail-delete {
   @apply text-muted hover:text-fail;
 }

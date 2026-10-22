@@ -111,6 +111,7 @@ export default function App() {
           onPrev={neighbor(-1)}
           onNext={neighbor(1)}
           onClose={closePanel}
+          onOpen={setOpenId}
         />
       )}
 

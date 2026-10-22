@@ -1,9 +1,9 @@
-import { Check, ChevronLeft, ChevronRight, CircleX, LocateFixed, Trash2, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, CircleX, CopyPlus, LocateFixed, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { Commitment } from "../../../api/types";
 import type { RecordActions } from "../../../hooks/useCommitments";
 import { COLUMNS } from "../../../lib/fields";
-import { boxOf, firstFlagged, type FocusKey } from "../../../lib/focus";
+import { boxOf, firstLocated, type FocusKey } from "../../../lib/focus";
 import EditableCell from "../../records/EditableCell/EditableCell";
 import NumberList from "../../records/NumberList/NumberList";
 import StatusBadge from "../../records/StatusBadge/StatusBadge";
@@ -18,23 +18,28 @@ interface Props {
   onPrev: (() => void) | null;
   onNext: (() => void) | null;
   onClose: () => void;
+  onOpen: (id: string) => void;
 }
 
 /** לוח צד: תמונת הטופס המקורי ליד השדות, לבדיקה ותיקון בעין. Esc סוגר, חצים מדפדפים. */
-export default function DetailPanel({ record: r, file, actions, sendersListId, onPrev, onNext, onClose }: Props) {
+export default function DetailPanel(props: Props) {
+  const { record: r, file, actions, sendersListId, onPrev, onNext, onClose, onOpen } = props;
   const [approving, setApproving] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const panel = useRef<HTMLElement>(null);
   const readOnly = r.kind === "sample" || r.state === "failed";
 
-  // השדה שמסומן בתמונת הטופס. כשהלוח נפתח: השדה הכתום הראשון שידוע איפה הוא כתוב
+  // השדה שמסומן בתמונת הטופס. כשהלוח נפתח: השדה הראשון שידוע איפה הוא כתוב (בדרך כלל השם הפרטי),
+  // כדי שיראו מיד את הקשר בין השדה לטופס. ביציאה מעריכת שדה הסימון יורד והתמונה חוזרת לגודל רגיל
   const [focus, setFocus] = useState<FocusKey | null>(null);
+  const unfocus = () => setFocus(null);
 
   // המקלדת עוברת ללוח כשהוא נפתח, כדי ש-Esc והחצים יעבדו גם אם הסמן היה בתיבת החיפוש
   useEffect(() => panel.current?.focus(), []);
   useEffect(() => setConfirming(false), [r.id]);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- רק במעבר לרשומה אחרת, לא אחרי כל תיקון
-  useEffect(() => setFocus(firstFlagged(r, COLUMNS.map((c) => c.key))), [r.id]);
+  useEffect(() => setFocus(firstLocated(r, COLUMNS.map((c) => c.key))), [r.id]);
 
   /** לחיצה על שדה או על מספר מסמנת אותו בתמונה (העריכה עצמה ממשיכה כרגיל). */
   function select(key: FocusKey | "central" | "commitment", e: MouseEvent) {
@@ -81,6 +86,14 @@ export default function DetailPanel({ record: r, file, actions, sendersListId, o
     const go = onNext ?? onPrev ?? onClose;
     if (await actions.remove(r.id)) go();
     setConfirming(false);
+  }
+
+  // התחייבות שהמודל לא הפריד: רשומה נוספת מאותו עמוד, ופתיחה שלה כדי להקליד את המספר
+  async function addSibling() {
+    setAdding(true);
+    const id = await actions.addSibling(r.id);
+    setAdding(false);
+    if (id) onOpen(id);
   }
 
   const title = r.source_page ? `עמוד ${r.source_page}` : "רשומה";
@@ -151,6 +164,7 @@ export default function DetailPanel({ record: r, file, actions, sendersListId, o
                       listId={col.key === "sender" ? sendersListId : undefined}
                       onSave={(v) => actions.correctField(r.id, col.key, v)}
                       onConfirm={() => actions.confirmField(r.id, col.key)}
+                      onEditEnd={unfocus}
                     />
                   ) : (
                     <NumberList
@@ -162,6 +176,7 @@ export default function DetailPanel({ record: r, file, actions, sendersListId, o
                       onCorrect={(id, v) => actions.correctNumber(r.id, id, v)}
                       onAdd={(v) => actions.addNumber(r.id, col.key, v)}
                       onDelete={(id) => actions.deleteNumber(r.id, id)}
+                      onEditEnd={unfocus}
                     />
                   )}
                 </div>
@@ -187,10 +202,18 @@ export default function DetailPanel({ record: r, file, actions, sendersListId, o
                 </button>
               </div>
             ) : (
-              <button className="btn btn-ghost detail-delete" onClick={() => setConfirming(true)}>
-                <Trash2 className="icon-sm" />
-                מחיקת הרשומה
-              </button>
+              <div className="detail-manage">
+                <button className="btn btn-ghost detail-delete" onClick={() => setConfirming(true)}>
+                  <Trash2 className="icon-sm" />
+                  מחיקת הרשומה
+                </button>
+                {r.state !== "failed" && (
+                  <button className="btn btn-ghost" onClick={addSibling} disabled={adding}>
+                    <CopyPlus className="icon-sm" />
+                    רשומה נוספת מהעמוד הזה
+                  </button>
+                )}
+              </div>
             )}
             {r.state === "pending" && (
               <div className="detail-approve">

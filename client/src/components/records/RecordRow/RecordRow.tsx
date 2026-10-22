@@ -1,4 +1,4 @@
-import { Check, CircleX, Eye, FileQuestion } from "lucide-react";
+import { Check, CircleX, Eye, FileQuestion, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import type { Commitment } from "../../../api/types";
 import type { RecordActions } from "../../../hooks/useCommitments";
@@ -23,9 +23,10 @@ function sourceLabel(r: Commitment): string | null {
   return r.source_file && r.source_file > 1 ? `קובץ ${r.source_file} · עמוד ${r.source_page}` : `עמוד ${r.source_page}`;
 }
 
-/** שורה אחת בטבלה: מצב, שבעת השדות לעריכה, וכפתור אישור. עמוד שנכשל, או שלא חולץ ממנו כלום, מוצג בהודעה אחת. */
+/** שורה אחת בטבלה: מצב, שבעת השדות לעריכה, אישור ומחיקה. עמוד שנכשל, או שלא חולץ ממנו כלום, מוצג בהודעה אחת. */
 export default function RecordRow({ record: r, actions, sendersListId, shortNames, onOpen }: Props) {
   const [approving, setApproving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const readOnly = r.kind === "sample" || r.state === "failed";
   const source = sourceLabel(r);
 
@@ -81,17 +82,44 @@ export default function RecordRow({ record: r, actions, sendersListId, shortName
       )}
 
       <td className="row-action">
-        <div className="row-buttons">
-          <button className="btn btn-ghost row-open" onClick={onOpen} aria-label="הצגת הטופס" title="הצגת הטופס">
-            <Eye className="icon-sm" />
-          </button>
-          {r.state === "pending" && r.kind !== "sample" && (
-            <button className="btn row-approve" onClick={approve} disabled={approving}>
-              <Check className="icon-sm" />
-              אישור
+        {confirmDelete ? (
+          <div className="row-buttons row-confirm-delete">
+            <span>למחוק?</span>
+            <button className="btn btn-danger row-delete-yes" onClick={() => actions.remove(r.id)}>
+              כן
             </button>
-          )}
-        </div>
+            <button
+              className="btn btn-ghost row-open"
+              onClick={() => setConfirmDelete(false)}
+              aria-label="ביטול"
+              title="ביטול"
+            >
+              <X className="icon-sm" />
+            </button>
+          </div>
+        ) : (
+          <div className="row-buttons">
+            <button className="btn btn-ghost row-open" onClick={onOpen} aria-label="הצגת הטופס" title="הצגת הטופס">
+              <Eye className="icon-sm" />
+            </button>
+            {r.kind !== "sample" && (
+              <button
+                className="btn btn-ghost row-open row-delete"
+                onClick={() => setConfirmDelete(true)}
+                aria-label="מחיקת הרשומה"
+                title="מחיקת הרשומה"
+              >
+                <Trash2 className="icon-sm" />
+              </button>
+            )}
+            {r.state === "pending" && r.kind !== "sample" && (
+              <button className="btn row-approve" onClick={approve} disabled={approving}>
+                <Check className="icon-sm" />
+                אישור
+              </button>
+            )}
+          </div>
+        )}
       </td>
     </tr>
   );

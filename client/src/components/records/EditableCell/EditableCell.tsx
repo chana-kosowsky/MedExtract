@@ -13,11 +13,12 @@ interface Props {
   as?: "td" | "div";
   onSave: (value: string) => Promise<boolean>;
   onConfirm?: () => Promise<boolean>;
+  onEditEnd?: () => void; // יציאה מהעריכה (שמירה, ביטול או ✓)
 }
 
 /** תא בטבלה: מציג ערך (כתום אם לא בטוח), ובלחיצה הופך לשדה עריכה. Enter שומר, Esc מבטל, ✓ מאשר כמו שהוא. */
 export default function EditableCell(props: Props) {
-  const { field, display, readOnly, placeholder, listId, as: Tag = "td", onSave, onConfirm } = props;
+  const { field, display, readOnly, placeholder, listId, as: Tag = "td", onSave, onConfirm, onEditEnd } = props;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -29,8 +30,13 @@ export default function EditableCell(props: Props) {
     setEditing(true);
   }
 
-  async function commit() {
+  function stop() {
     setEditing(false);
+    onEditEnd?.();
+  }
+
+  async function commit() {
+    stop();
     if (draft.trim() === (field.value ?? "")) return;
     setSaving(true);
     await onSave(draft.trim());
@@ -44,11 +50,17 @@ export default function EditableCell(props: Props) {
     setSaving(true);
     await onConfirm?.();
     setSaving(false);
+    onEditEnd?.();
+  }
+
+  function edit(e: MouseEvent) {
+    e.stopPropagation();
+    open();
   }
 
   function onKey(e: KeyboardEvent) {
     if (e.key === "Enter") commit();
-    if (e.key === "Escape") setEditing(false);
+    if (e.key === "Escape") stop();
   }
 
   const tone = field.status === "review" ? "cell-review" : field.status === "not_found" ? "cell-missing" : "cell-ok";
@@ -86,7 +98,9 @@ export default function EditableCell(props: Props) {
                       <Check />
                     </button>
                   )}
-                  <Pencil className="cell-pencil" />
+                  <button className="cell-edit" onClick={edit} aria-label="עריכה" title="עריכה">
+                    <Pencil />
+                  </button>
                 </>
               )
             )}
