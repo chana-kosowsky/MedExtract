@@ -29,9 +29,9 @@ app = FastAPI(title="MedExtract", lifespan=lifespan)
 app.include_router(router)
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
-    """מחזירה אם השרת והמסד תקינים."""
+    """מחזירה אם השרת והמסד תקינים. גם HEAD, כי שירותי פינג חינמיים שולחים HEAD."""
     try:
         db.ping()
         return {"status": "ok", "db": "ok"}

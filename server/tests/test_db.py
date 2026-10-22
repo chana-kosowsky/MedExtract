@@ -52,6 +52,12 @@ def test_save_and_read_back(client):
     assert r["needs_review"] is True
 
 
+def test_health_answers_head(client):
+    """שירות הפינג שולח HEAD: גם עליו עונים 200 ובודקים את המסד."""
+    assert client.get("/health").json() == {"status": "ok", "db": "ok"}
+    assert client.head("/health").status_code == 200
+
+
 def test_model_saved_but_not_sent_to_screen(client):
     """איזה מודל קרא את העמוד נשמר במסד (למדידה), ולא נשלח לממשק (החלטה 34)."""
     rid = db.save_form(make_form(model="claude-opus-5-5"), "b1", 1)
