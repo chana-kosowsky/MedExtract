@@ -259,7 +259,7 @@ def _strip_fence(text: str) -> str:
 
 # ---------- שרשרת מודלים (החלטה 34) ----------
 
-MIDDLE_TIMEOUT = 45  # מודל באמצע השרשרת (3.8 Flash) לא יתקע את הערימה
+MIDDLE_TIMEOUT = 120  # 3.8 Flash באמצע השרשרת: כ-79 שניות לעמוד בממוצע, ו-45 הפילו אותו כמעט תמיד
 PERMANENT = {"quota", "api", "config"}  # כשל שלא יעבור בעמוד הבא: מכסה, קרדיט שנגמר, מפתח שגוי
 PROVIDERS = {"gemini": GeminiExtractor, "anthropic": AnthropicExtractor}
 
