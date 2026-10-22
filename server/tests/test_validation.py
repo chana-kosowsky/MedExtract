@@ -307,6 +307,22 @@ def test_every_canonical_name_matches_itself(name):
     assert r.status == FieldStatus.ok and r.value == name
 
 
+@pytest.mark.parametrize("canonical,alias", [
+    (c, a) for group in ("hmos", "hospitals", "others")
+    for c, aliases in __import__("app.validation", fromlist=["x"])._SENDERS_FILE[group].items() for a in aliases
+])
+def test_every_alias_matches_only_its_own_sender(canonical, alias):
+    """כל כינוי ברשימה מותאם בדיוק לגורם שלו בלבד (שום כינוי לא מתנגש בגורם אחר)."""
+    r = match_sender(mf(alias))
+    assert r.status == FieldStatus.ok and r.value == canonical
+
+
+@pytest.mark.parametrize("text", ["באר שבע", "ראשון לציון", "צפון", "סנט", "הרופא", "לבריאות הנפש"])
+def test_shared_words_are_not_guessed(text):
+    """מילה שמשותפת לכמה גורמים (עיר, אזור, סוג) לא מנוחשת לגורם אחד: לבדיקה."""
+    assert match_sender(mf(text)).status == FieldStatus.review
+
+
 @pytest.mark.parametrize("text,expected", [
     ("אסף הרופא", SHAMIR),
     ("מרכז רפואי שמיר", SHAMIR),
