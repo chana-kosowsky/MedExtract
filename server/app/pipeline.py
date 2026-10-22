@@ -148,6 +148,11 @@ def check_not_blank(img: Image.Image) -> None:
         raise ExtractionError("empty_page", "העמוד ריק.")
 
 
+def _free_pdf_cache() -> None:
+    """מרוקנת את המטמון של PyMuPDF (תמונות סרוקות שפוענחו). בלי זה הוא גדל בכ-25MB לעמוד, והשרת בענן (512MB) קרס."""
+    pymupdf.TOOLS.store_shrink(100)
+
+
 def render_pdf_page(doc: pymupdf.Document, index: int) -> tuple[bytes, str]:
     """ממירה עמוד PDF לתמונת PNG בזיכרון."""
     try:
@@ -155,6 +160,8 @@ def render_pdf_page(doc: pymupdf.Document, index: int) -> tuple[bytes, str]:
         img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
     except Exception:
         raise ExtractionError("bad_page", "העמוד פגום ולא ניתן לקרוא אותו.") from None
+    finally:
+        _free_pdf_cache()
     check_not_blank(img)
     return pix.tobytes("png"), "image/png"
 
@@ -169,6 +176,8 @@ def pdf_barcodes(doc: pymupdf.Document, index: int) -> list[Barcode]:
         img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
     except Exception:
         return []
+    finally:
+        _free_pdf_cache()
     return read_barcodes(img)
 
 
