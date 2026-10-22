@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, commitments as api, getSenders } from "../api/client";
 import type { Commitment, CommitmentList, ListParams, NumberKind, SingleField } from "../api/types";
 import type { Notify } from "./useToast";
@@ -18,7 +18,7 @@ export function useCommitments(params: ListParams = {}, notify?: Notify) {
   const [data, setData] = useState<CommitmentList>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [senders, setSenders] = useState<string[]>([]);
+  const [senderList, setSenderList] = useState<{ name: string; short: string }[]>([]);
   const [limit, setLimit] = useState(PAGE_SIZE);
   const paramsKey = JSON.stringify(params);
   const latest = useRef(0);
@@ -44,8 +44,11 @@ export function useCommitments(params: ListParams = {}, notify?: Notify) {
   }, [refresh]);
 
   useEffect(() => {
-    getSenders().then(setSenders).catch(() => setSenders([]));
+    getSenders().then(setSenderList).catch(() => setSenderList([]));
   }, []);
+  // השמות המלאים (להשלמה ולסינון), ושם קצר לכל גורם לתצוגה בטבלה
+  const senders = useMemo(() => senderList.map((s) => s.name), [senderList]);
+  const shortNames = useMemo(() => Object.fromEntries(senderList.map((s) => [s.name, s.short])), [senderList]);
 
   // מריצה שינוי בשרת, מחליפה את השורה בתשובה, מודיעה שנשמר, ומרעננת ספירות ברקע
   const mutate = useCallback(
@@ -116,6 +119,7 @@ export function useCommitments(params: ListParams = {}, notify?: Notify) {
     loading,
     error,
     senders,
+    shortNames,
     refresh,
     showMore,
     showError: setError,

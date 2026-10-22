@@ -87,8 +87,8 @@ export const uploads = {
   cancel: (id: string) => json<Job>(`/api/uploads/${id}/cancel`, "POST"),
 };
 
-/** הרשימה הסגורה של הגורמים השולחים. */
-export const getSenders = () => request<string[]>("/api/senders");
+/** הרשימה הסגורה של הגורמים השולחים: שם מלא, ושם קצר לטבלה. */
+export const getSenders = () => request<{ name: string; short: string }[]>("/api/senders");
 
 export const commitments = {
   list: (params: ListParams & { limit?: number } = {}) =>

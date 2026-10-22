@@ -1,6 +1,12 @@
 // השדות בסדר של האתגר, עם הכותרות בעברית, והסבר לשדה לא בטוח
 
-import type { FieldValue, NumberKind, SingleField } from "../api/types";
+import type { Commitment, FieldValue, NumberKind, SingleField } from "../api/types";
+
+/** האם לא חולץ מהעמוד אף שדה ואף מספר (אז מוצגת הודעה אחת במקום שבעה תאים ריקים). */
+export function nothingExtracted(r: Commitment): boolean {
+  const fields: SingleField[] = ["first_name", "last_name", "id_number", "received_date", "sender"];
+  return fields.every((f) => !r[f].value) && r.central_numbers.length === 0 && r.commitment_numbers.length === 0;
+}
 
 /** הסבר לשדה לא בטוח: הסיבה, ומה נקרא בטופס אם שונה מהערך. null לשדה תקין. */
 export function reviewTip(field: FieldValue): string | null {

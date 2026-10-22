@@ -9,7 +9,7 @@ from starlette.formparsers import MultiPartParser
 
 from . import db, export, pipeline
 from .extractor import ExtractionError, build_extractor
-from .validation import SENDERS
+from .validation import SENDERS, short_sender_name
 
 log = logging.getLogger("medextract")
 
@@ -108,8 +108,8 @@ def _call(fn, *args):
 
 @router.get("/senders")
 def list_senders():
-    """הרשימה הסגורה של הגורמים השולחים (להשלמה אוטומטית בתיקון)."""
-    return SENDERS
+    """הרשימה הסגורה של הגורמים השולחים: שם מלא (נשמר במסד, להשלמה בתיקון) ושם קצר לתצוגה בטבלה."""
+    return [{"name": s, "short": short_sender_name(s)} for s in SENDERS]
 
 
 @router.get("/commitments")

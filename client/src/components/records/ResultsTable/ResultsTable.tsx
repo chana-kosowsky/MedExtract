@@ -12,6 +12,7 @@ interface Props {
   loading: boolean;
   error: string | null;
   senders: string[];
+  shortNames: Record<string, string>;
   actions: RecordActions;
   toolbar: ReactNode;
   exportButton: ReactNode;
@@ -60,7 +61,7 @@ function EmptyState({ loading, filtered }: { loading: boolean; filtered: boolean
 
 /** טבלת הרשומות: שורה לכל התחייבות, עמודה לכל שדה, ואישור של כל הרשומות הבטוחות. */
 export default function ResultsTable(props: Props) {
-  const { items, total, loading, error, senders, actions, toolbar, exportButton, filtered } = props;
+  const { items, total, loading, error, senders, shortNames, actions, toolbar, exportButton, filtered } = props;
   const { onOpen, onClearError, onShowMore } = props;
   const [approving, setApproving] = useState(false);
   const safe = items.filter((r) => r.state === "pending" && !r.needs_review && r.kind === "user").length;
@@ -125,6 +126,7 @@ export default function ResultsTable(props: Props) {
                   record={r}
                   actions={actions}
                   sendersListId={SENDERS_LIST_ID}
+                  shortNames={shortNames}
                   onOpen={() => onOpen(r.id)}
                 />
               ))}

@@ -6,6 +6,7 @@ import "./EditableCell.css";
 
 interface Props {
   field: FieldValue;
+  display?: string; // טקסט קצר להצגה במקום הערך (השם המלא נשמר ומופיע בריחוף ובעריכה)
   readOnly: boolean;
   placeholder?: string;
   listId?: string;
@@ -16,7 +17,7 @@ interface Props {
 
 /** תא בטבלה: מציג ערך (כתום אם לא בטוח), ובלחיצה הופך לשדה עריכה. Enter שומר, Esc מבטל, ✓ מאשר כמו שהוא. */
 export default function EditableCell(props: Props) {
-  const { field, readOnly, placeholder, listId, as: Tag = "td", onSave, onConfirm } = props;
+  const { field, display, readOnly, placeholder, listId, as: Tag = "td", onSave, onConfirm } = props;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -68,7 +69,12 @@ export default function EditableCell(props: Props) {
       ) : (
         <div className="cell-content">
           {field.status === "review" && <CircleAlert className="cell-flag" />}
-          <span className={field.value ? "cell-value" : "cell-empty"}>{field.value ?? "חסר"}</span>
+          <span
+            className={field.value ? "cell-value" : "cell-empty"}
+            title={display && display !== field.value ? (field.value ?? undefined) : undefined}
+          >
+            {field.value ? display || field.value : "חסר"}
+          </span>
           <span className="cell-actions">
             {saving ? (
               <LoaderCircle className="cell-spinner" />

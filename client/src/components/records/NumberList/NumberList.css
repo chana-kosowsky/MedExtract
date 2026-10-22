@@ -10,7 +10,7 @@
   @apply flex flex-wrap items-center gap-1.5;
 }
 .numbers-empty {
-  @apply rounded border border-dashed border-review/60 px-1.5 text-xs font-medium text-review-ink;
+  @apply text-xs font-medium text-review-ink/70;
 }
 
 /* תגית מספר */
@@ -19,7 +19,7 @@
     font-mono text-[13px] font-semibold tabular-nums transition hover:border-brand-300;
 }
 .chip-review {
-  @apply border-review bg-review-bg text-review-ink;
+  @apply border-review/40 bg-review-bg text-review-ink;
 }
 .chip-flag {
   @apply size-3.5 text-review;

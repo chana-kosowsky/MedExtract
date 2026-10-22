@@ -1,8 +1,8 @@
-import { Check, CircleX, Eye } from "lucide-react";
+import { Check, CircleX, Eye, FileQuestion } from "lucide-react";
 import { useState } from "react";
 import type { Commitment } from "../../../api/types";
 import type { RecordActions } from "../../../hooks/useCommitments";
-import { COLUMNS } from "../../../lib/fields";
+import { COLUMNS, nothingExtracted } from "../../../lib/fields";
 import EditableCell from "../EditableCell/EditableCell";
 import NumberList from "../NumberList/NumberList";
 import StatusBadge from "../StatusBadge/StatusBadge";
@@ -12,6 +12,7 @@ interface Props {
   record: Commitment;
   actions: RecordActions;
   sendersListId: string;
+  shortNames: Record<string, string>;
   onOpen: () => void;
 }
 
@@ -22,8 +23,8 @@ function sourceLabel(r: Commitment): string | null {
   return r.source_file && r.source_file > 1 ? `קובץ ${r.source_file} · עמוד ${r.source_page}` : `עמוד ${r.source_page}`;
 }
 
-/** שורה אחת בטבלה: מצב, שבעת השדות לעריכה, וכפתור אישור. עמוד שנכשל מוצג בשורה אחת עם הסיבה. */
-export default function RecordRow({ record: r, actions, sendersListId, onOpen }: Props) {
+/** שורה אחת בטבלה: מצב, שבעת השדות לעריכה, וכפתור אישור. עמוד שנכשל, או שלא חולץ ממנו כלום, מוצג בהודעה אחת. */
+export default function RecordRow({ record: r, actions, sendersListId, shortNames, onOpen }: Props) {
   const [approving, setApproving] = useState(false);
   const readOnly = r.kind === "sample" || r.state === "failed";
   const source = sourceLabel(r);
@@ -46,12 +47,18 @@ export default function RecordRow({ record: r, actions, sendersListId, onOpen }:
           <CircleX className="icon-sm" />
           העמוד לא עובד: {r.error_message}
         </td>
+      ) : nothingExtracted(r) ? (
+        <td className="row-empty-message" colSpan={COLUMNS.length} onClick={onOpen}>
+          <FileQuestion className="icon-sm" />
+          לא חולצו שדות מהעמוד. אפשר לפתוח את הטופס ולהקליד אותם.
+        </td>
       ) : (
         COLUMNS.map((col) =>
           col.kind === "field" ? (
             <EditableCell
               key={col.key}
               field={r[col.key]}
+              display={col.key === "sender" && r.sender.value ? shortNames[r.sender.value] : undefined}
               readOnly={readOnly}
               placeholder={col.placeholder}
               listId={col.key === "sender" ? sendersListId : undefined}

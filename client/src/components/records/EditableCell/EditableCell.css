@@ -9,11 +9,12 @@
 .cell-ok {
   @apply bg-white;
 }
+/* לבדיקה: רקע כתום עדין ואייקון, בלי מסגרת, כדי שטבלה עם הרבה שדות כתומים לא תיראה עמוסה */
 .cell-review {
-  @apply bg-review-bg shadow-[inset_0_0_0_1px_var(--color-review)];
+  @apply bg-review-bg/70;
 }
 .cell-missing {
-  @apply bg-review-bg/50;
+  @apply bg-review-bg/40;
 }
 
 .cell-content {
@@ -23,7 +24,7 @@
   @apply font-medium;
 }
 .cell-empty {
-  @apply rounded border border-dashed border-review/60 px-1.5 text-xs font-medium text-review-ink;
+  @apply text-xs font-medium text-review-ink/70;
 }
 .cell-flag {
   @apply size-4 shrink-0 text-review;

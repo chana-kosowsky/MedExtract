@@ -76,6 +76,7 @@ export default function App() {
           onShowMore={records.showMore}
           error={records.error}
           senders={records.senders}
+          shortNames={records.shortNames}
           actions={records.actions}
           filtered={hasFilters(filters)}
           onOpen={setOpenId}

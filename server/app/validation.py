@@ -16,6 +16,12 @@ _GENERIC_WORDS = {"המרכז", "מרכז", "הרפואי", "רפואי", "בי�
                   "ביהח", "האוניברסיטאי", "עש", "קמפוס"}
 
 
+def short_sender_name(name: str) -> str:
+    """שם קצר לתצוגה בטבלה: הכינוי הראשון של בית חולים (ברשימה הוא הכינוי המוכר), אחרת השם עצמו."""
+    aliases = HOSPITALS.get(name)
+    return aliases[0] if aliases else name
+
+
 def normalize_sender(text: str) -> str:
     """מנקה שם גורם להשוואה: בלי מירכאות, סימני פיסוק ומילים כלליות."""
     text = re.sub(r"[\"'״׳]", "", text)

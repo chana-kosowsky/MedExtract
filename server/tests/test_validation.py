@@ -317,6 +317,16 @@ def test_every_alias_matches_only_its_own_sender(canonical, alias):
     assert r.status == FieldStatus.ok and r.value == canonical
 
 
+def test_short_sender_names():
+    """שם קצר לטבלה: הכינוי הראשון של בית חולים; קופה, גורם אחר או בית חולים בלי כינוי: השם עצמו."""
+    from app.validation import short_sender_name
+    assert short_sender_name(SHAMIR) == "שמיר - אסף הרופא"
+    assert short_sender_name("מרכז רפואי רבין - קמפוס גולדה השרון") == "גולדה השרון"
+    assert short_sender_name("כללית") == "כללית"
+    assert short_sender_name("תיירות מרפא") == "תיירות מרפא"
+    assert short_sender_name("מרכז רפואי רעות") == "מרכז רפואי רעות"
+
+
 @pytest.mark.parametrize("text", ["באר שבע", "ראשון לציון", "צפון", "סנט", "הרופא", "לבריאות הנפש"])
 def test_shared_words_are_not_guessed(text):
     """מילה שמשותפת לכמה גורמים (עיר, אזור, סוג) לא מנוחשת לגורם אחד: לבדיקה."""

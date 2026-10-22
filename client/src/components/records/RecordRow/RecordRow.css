@@ -25,6 +25,15 @@
   @apply me-1.5 inline;
 }
 
+/* עמוד שלא חולץ ממנו אף שדה: הודעה אחת במקום שבעה תאים "חסר". לחיצה פותחת את הטופס */
+.row-empty-message {
+  @apply cursor-pointer border-b border-line bg-review-bg/40 px-3 py-2.5 align-middle text-sm text-review-ink
+    hover:bg-review-bg;
+}
+.row-empty-message svg {
+  @apply me-1.5 inline;
+}
+
 .row-action {
   @apply border-b border-line px-3 py-2.5 text-end align-middle;
 }
