@@ -92,7 +92,9 @@ One image of one page.
 JSON matching the provided schema. Hebrew values stay in Hebrew.
 - text: exact text, or null if the field does not appear.
 - confidence: 0-1, how sure you are the reading is correct character-by-character.
-- unclear_reason: why you are unsure, written in HEBREW (e.g. "כתב יד לא ברור", "מדבקה חתוכה", "טשטוש", "דף מסובב").
+- unclear_reason: ONLY when you have a real doubt about a specific character or word - say which one, briefly, in HEBREW
+  (e.g. "הספרה השלישית 3 או 8", "מדבקה חתוכה בסוף המספר", "האות האחרונה בשם לא ברורה"). Otherwise null.
+  Handwriting, a rotated page, a scan or a stamp are NOT reasons by themselves: a clear handwritten value gets null.
 - box_2d: where the value is written on the page, as [ymin, xmin, ymax, xmax] normalized to 0-1000
   (0,0 = top-left corner of the image), tightly around the value itself. null when text is null.
 

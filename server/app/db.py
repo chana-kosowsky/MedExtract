@@ -260,11 +260,16 @@ def list_commitments(q: str | None = None, sender: str | None = None, state: str
     if batch_id:
         stmt = stmt.where(Commitment.batch_id == batch_id)
 
+    # ההעלאה האחרונה למעלה, ובתוכה לפי סדר הקבצים והעמודים (רשומה שנוספה ידנית אחרי המקור שלה)
+    started = (select(Commitment.batch_id, func.min(Commitment.created_at).label("started"))
+               .group_by(Commitment.batch_id).subquery())
+    stmt = stmt.outerjoin(started, started.c.batch_id == Commitment.batch_id)
+    order = (func.coalesce(started.c.started, Commitment.created_at).desc(), Commitment.batch_id,
+             Commitment.source_file, Commitment.source_page, Commitment.created_at)
+
     with _session() as s:
         total = s.exec(select(func.count()).select_from(stmt.subquery())).one()
-        rows = list(s.exec(stmt.order_by(Commitment.created_at.desc(), Commitment.batch_id,
-                                         Commitment.source_file, Commitment.source_page)
-                           .limit(limit).offset(offset)))
+        rows = list(s.exec(stmt.order_by(*order).limit(limit).offset(offset)))
         nums = list(s.exec(select(CommitmentNumber)
                            .where(CommitmentNumber.commitment_id.in_([c.id for c in rows]))
                            .order_by(CommitmentNumber.kind, CommitmentNumber.position)))

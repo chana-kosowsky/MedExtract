@@ -9,5 +9,8 @@ export const ACCEPTED_FILES = ".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/
 /** כמה דקות לוקח להקליד טופס ידנית (לפי האתגר: 30 טפסים בשעה). */
 export const MANUAL_MINUTES_PER_FORM = 2;
 
+/** כמה שניות צפוי לקחת עמוד במערכת (נמדד בדמו ב-22/10/2026: 23.8 שניות לעמוד ב-Opus). */
+export const EXPECTED_SECONDS_PER_PAGE = 25;
+
 /** כל כמה זמן נבדקת התקדמות העיבוד. */
 export const POLL_MS = 1500;

@@ -9,7 +9,9 @@ export function formatDuration(seconds: number): string {
 /** משך במילים: "40 שניות" מתחת לדקה, אחרת "כ-12 דקות". */
 export function formatSpan(seconds: number): string {
   const s = Math.max(0, Math.round(seconds));
-  return s < 60 ? `${s} שניות` : `כ-${Math.round(s / 60)} דקות`;
+  if (s < 60) return `${s} שניות`;
+  const m = Math.round(s / 60);
+  return m === 1 ? "כדקה" : `כ-${m} דקות`;
 }
 
 /** גודל קובץ קריא (KB / MB). */

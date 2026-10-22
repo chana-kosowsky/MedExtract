@@ -247,6 +247,15 @@ def test_approve_safe_only_all_ok(client):
     assert states == {s1: "approved", s2: "pending", s3: "pending"}
 
 
+def test_list_order_latest_upload_then_pages(client):
+    """ההעלאה האחרונה למעלה; בתוכה לפי סדר העמודים, ורשומה שנוספה ידנית מיד אחרי המקור שלה."""
+    first = {p: db.save_form(make_form(source_page=p), "old", 1) for p in (3, 1, 2)}
+    later = [db.save_form(make_form(source_page=p), "new", 1) for p in (2, 1)]
+    added = client.post(f"/api/commitments/{first[1]}/sibling").json()["id"]
+    ids = [i["id"] for i in client.get("/api/commitments").json()["items"]]
+    assert ids == [later[1], later[0], first[1], added, first[2], first[3]]
+
+
 def test_search_and_filters(client):
     """חיפוש בשם, בת"ז ובמספרים; סינון לפי גורם, סטטוס ו'רק לבדיקה'; ספירה."""
     a = db.save_form(make_form(), "b1", 1)

@@ -1,6 +1,6 @@
 import { CircleCheck, CircleX, Clock, LoaderCircle, Play, Square, TriangleAlert, Upload, Zap } from "lucide-react";
 import type { Job, PageResult } from "../../../api/types";
-import { MANUAL_MINUTES_PER_FORM } from "../../../config";
+import { EXPECTED_SECONDS_PER_PAGE, MANUAL_MINUTES_PER_FORM } from "../../../config";
 import { formatDuration, formatSpan } from "../../../lib/format";
 import "./ProgressPanel.css";
 
@@ -53,6 +53,8 @@ export default function ProgressPanel(props: Props) {
   // בזמן העיבוד: הזמן הצפוי לכל ההעלאה. בסוף: רק הטפסים שעובדו בפועל.
   const forms = running ? job.total_pages : job.succeeded;
   const manualSeconds = forms * MANUAL_MINUTES_PER_FORM * 60;
+  // ההשוואה מחושבת מראש לפי מספר העמודים; הזמן בפועל מוצג בשעון, והחיסכון בסוף לפי הזמן בפועל
+  const expectedSeconds = forms * EXPECTED_SECONDS_PER_PAGE;
   const savedSeconds = manualSeconds - elapsed;
   const failures = job.results.filter((r) => !r.ok);
 
@@ -88,10 +90,10 @@ export default function ProgressPanel(props: Props) {
           <span className="compare-value compare-manual">{formatSpan(manualSeconds)}</span>
         </div>
         <div className="compare-item">
-          <span className="compare-label">MedExtract</span>
+          <span className="compare-label">MedExtract (צפוי)</span>
           <span className="compare-value compare-fast">
             <Zap />
-            {formatSpan(elapsed)}
+            {formatSpan(expectedSeconds)}
           </span>
         </div>
         {!running && savedSeconds > 0 && (

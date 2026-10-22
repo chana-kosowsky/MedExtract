@@ -2,7 +2,7 @@ import { Check, ChevronLeft, ChevronRight, CircleX, CopyPlus, LocateFixed, Trash
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { Commitment } from "../../../api/types";
 import type { RecordActions } from "../../../hooks/useCommitments";
-import { COLUMNS } from "../../../lib/fields";
+import { COLUMNS, fullReason } from "../../../lib/fields";
 import { boxOf, firstLocated, type FocusKey } from "../../../lib/focus";
 import EditableCell from "../../records/EditableCell/EditableCell";
 import NumberList from "../../records/NumberList/NumberList";
@@ -61,6 +61,15 @@ export default function DetailPanel(props: Props) {
       ? numbersOf(key).some((n) => n.box)
       : !!boxOf(r, key as FocusKey);
   const focusBox = boxOf(r, focus);
+
+  // ההסבר המלא לשדה לא בטוח (בטבלה הבועה מקוצרת): לשדה בודד, או לכל מספר מסומן
+  const reasonsOf = (col: (typeof COLUMNS)[number]): string[] => {
+    if (col.kind === "field") return [fullReason(r[col.key])].filter((t): t is string => !!t);
+    return numbersOf(col.key).flatMap((n) => {
+      const text = fullReason(n);
+      return text ? [`${n.value}: ${text}`] : [];
+    });
+  };
   const canLocate = file !== null && COLUMNS.some((c) => located(c.key));
 
   useEffect(() => {
@@ -179,6 +188,11 @@ export default function DetailPanel(props: Props) {
                       onEditEnd={unfocus}
                     />
                   )}
+                  {reasonsOf(col).map((text) => (
+                    <p key={text} className="detail-reason">
+                      {text}
+                    </p>
+                  ))}
                 </div>
               ))
             )}

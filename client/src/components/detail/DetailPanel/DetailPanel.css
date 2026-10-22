@@ -79,6 +79,11 @@
   @apply flex items-center gap-2 rounded-lg bg-fail-bg px-3 py-3 text-sm text-fail;
 }
 
+/* ההסבר המלא לשדה לא בטוח, בטקסט קטן מתחת לשדה */
+.detail-reason {
+  @apply mt-1 text-xs leading-snug text-review-ink/80;
+}
+
 .detail-foot {
   @apply flex items-center justify-between gap-3 border-t border-line bg-canvas/60 px-5 py-3;
 }
