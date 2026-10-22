@@ -71,6 +71,9 @@ One image of one page.
    the HMO only issues the commitment. A hospital may appear as its logo, or handwritten in a "בית החולים" field
    on an HMO's form template (e.g. a Clalit form with "השרון" written in it -> the sender is that hospital).
    Use an HMO only when no hospital appears on the form.
+   On an HMO's commitment form, the "נותן השירות" / "ספק השירות" (service provider) box names the lab that
+   PERFORMS the test - it is the RECIPIENT, never the sender. The Central Virology Laboratory is at Sheba
+   (שיבא / תל השומר), so Sheba in that box is the recipient; the sender is then the HMO that issued the form.
    On printed computer screens, the paying party may be "תיירות מרפא" or "הרשות הפלסטינית" - these are on the list.
    Choose from:
 {senders}
